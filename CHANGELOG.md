@@ -14,6 +14,7 @@ Possible log types:
 ### v0.4.0 (2025-04-29) - (unreleased)
 
 - [added] Support for macro expressions.  See `MacroDecimal`.
+- [changed] Replaced `Aperture::Other` with `Aperture::Macro`, the latter having option arguments. 
 
 ### v0.3.0 (2022-07-05)
 
