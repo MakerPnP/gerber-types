@@ -11,6 +11,9 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### v0.4.0 (2025-04-29) - (unreleased)
+
+- [added] Support for macro expressions.  See `MacroDecimal`.
 
 ### v0.3.0 (2022-07-05)
 
