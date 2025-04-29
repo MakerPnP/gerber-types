@@ -244,6 +244,20 @@ mod test {
     }
 
     #[test]
+    fn test_aperture_macro_definition() {
+        let m1 = ApertureDefinition {
+            code: 42,
+            aperture: Aperture::Macro("NO_ARGS1".to_string(), None),
+        };
+        let m2 = ApertureDefinition {
+            code: 69,
+            aperture: Aperture::Macro("With_Args2".to_string(), Some("$1X0.25X$1x$2".to_string())),
+        };
+        assert_partial_code!(m1, "42NO_ARGS1");
+        assert_partial_code!(m2, "69With_Args2,$1X0.25X$1x$2");
+    }
+
+    #[test]
     fn test_polarity_serialize() {
         let d = ExtendedCode::LoadPolarity(Polarity::Dark);
         let c = ExtendedCode::LoadPolarity(Polarity::Clear);

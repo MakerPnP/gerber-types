@@ -53,7 +53,7 @@ pub enum Aperture {
     Rectangle(Rectangular),
     Obround(Rectangular),
     Polygon(Polygon),
-    Other(String),
+    Macro(String, Option<String>),
 }
 
 impl<W: Write> PartialGerberCode<W> for Aperture {
@@ -75,7 +75,12 @@ impl<W: Write> PartialGerberCode<W> for Aperture {
                 write!(writer, "P,")?;
                 polygon.serialize_partial(writer)?;
             }
-            Aperture::Other(ref string) => write!(writer, "{}", string)?,
+            Aperture::Macro(ref string, ref args) => {
+                write!(writer, "{}", string)?;
+                if let Some(ref args) = *args {
+                    write!(writer, ",{}", args)?;
+                }
+            },
         };
         Ok(())
     }
