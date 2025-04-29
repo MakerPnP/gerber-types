@@ -106,6 +106,58 @@ impl<W: Write> PartialGerberCode<W> for MacroDecimal {
     }
 }
 
+/// The gerber specification (2021.02 - 2024.05) 3.4 Data Types does not define a boolean
+/// However, there are various places where they are used in macros whey there are defined
+/// as having a 0 or 1 value.  Such as the 'exposure' flag.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MacroBoolean {
+    Value(bool),
+    Variable(u32),
+    Expression(String),
+}
+
+impl<W: Write> PartialGerberCode<W> for MacroBoolean {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match *self {
+            MacroBoolean::Value(ref v) => write!(writer, "{}", *v as u8)?,
+            MacroBoolean::Variable(ref v) => write!(writer, "${}", v)?,
+            MacroBoolean::Expression(ref v) => write!(writer, "{}", v)?,
+        };
+        Ok(())
+    }
+}
+
+/// Gerber specification (2021.02 - 2024.05) 3.4.1 Integers
+/// "Integers must fit in a 32-bit signed integer"
+#[derive(Debug, Clone, PartialEq)]
+pub enum MacroInteger {
+    Value(u32),
+    Variable(u32),
+    Expression(String),
+}
+
+impl<W: Write> PartialGerberCode<W> for MacroInteger {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match *self {
+            MacroInteger::Value(ref v) => write!(writer, "{}", v)?,
+            MacroInteger::Variable(ref v) => write!(writer, "${}", v)?,
+            MacroInteger::Expression(ref v) => write!(writer, "{}", v)?,
+        };
+        Ok(())
+    }
+}
+
+/// Gerber specification (2021.02 - 2024.05) 4.5.1.1 Primitives / Overview
+/// "Except for the comment all the parameters can be a decimal, integer, macro variables or an arithmetic expression"
+///
+/// However, AFAICT (DC), it doesn't make sense for a the Vertices of the Outline to be a macro variable or expression.
+/// Only a literal makes sense since the amount of co-ordinate arguments for the macro cannot change after it is defined
+/// *and* the last point of an outline has to be the same as the first point.
+///
+/// FUTURE report this specification inconsistency with `UCamco` and provide a support reference or link here.
+///
+/// Fortunately for us the [`OutlinePrimitive`] doesn't need to store the amount of vertices since it uses a [`Vec`] to store the points.
+///
 #[derive(Debug, Clone, PartialEq)]
 pub enum MacroContent {
     // Primitives
@@ -173,7 +225,7 @@ impl<T: Into<String>> From<T> for MacroContent {
 #[derive(Debug, Clone, PartialEq)]
 pub struct CirclePrimitive {
     /// Exposure off/on
-    pub exposure: bool,
+    pub exposure: MacroBoolean,
 
     /// Diameter, a decimal >= 0
     pub diameter: MacroDecimal,
@@ -195,7 +247,7 @@ pub struct CirclePrimitive {
 impl CirclePrimitive {
     pub fn new(diameter: MacroDecimal) -> Self {
         CirclePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             diameter,
             center: (MacroDecimal::Value(0.0), MacroDecimal::Value(0.0)),
             angle: None,
@@ -207,9 +259,14 @@ impl CirclePrimitive {
         self
     }
 
-    pub fn exposure_on(mut self, exposure: bool) -> Self {
+    pub fn with_exposure(mut self, exposure: MacroBoolean) -> Self {
         self.exposure = exposure;
         self
+    }
+
+    #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    pub fn exposure_on(mut self, exposure: bool) -> Self {
+        self.with_exposure(MacroBoolean::Value(exposure))
     }
 
     pub fn with_angle(mut self, angle: MacroDecimal) -> Self {
@@ -240,7 +297,7 @@ impl<W: Write> PartialGerberCode<W> for CirclePrimitive {
 #[derive(Debug, Clone, PartialEq)]
 pub struct VectorLinePrimitive {
     /// Exposure off/on
-    pub exposure: bool,
+    pub exposure: MacroBoolean,
 
     /// Line width, a decimal >= 0
     pub width: MacroDecimal,
@@ -262,7 +319,7 @@ pub struct VectorLinePrimitive {
 impl VectorLinePrimitive {
     pub fn new(start: (MacroDecimal, MacroDecimal), end: (MacroDecimal, MacroDecimal)) -> Self {
         VectorLinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             width: MacroDecimal::Value(0.0),
             start,
             end,
@@ -270,9 +327,14 @@ impl VectorLinePrimitive {
         }
     }
 
-    pub fn exposure_on(mut self, exposure: bool) -> Self {
+    pub fn with_exposure(mut self, exposure: MacroBoolean) -> Self {
         self.exposure = exposure;
         self
+    }
+
+    #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    pub fn exposure_on(mut self, exposure: bool) -> Self {
+        self.with_exposure(MacroBoolean::Value(exposure))
     }
 
     pub fn with_width(mut self, width: MacroDecimal) -> Self {
@@ -310,7 +372,7 @@ impl<W: Write> PartialGerberCode<W> for VectorLinePrimitive {
 #[derive(Debug, Clone, PartialEq)]
 pub struct CenterLinePrimitive {
     /// Exposure off/on (0/1)
-    pub exposure: bool,
+    pub exposure: MacroBoolean,
 
     /// Rectangle dimensions (width/height)
     pub dimensions: (MacroDecimal, MacroDecimal),
@@ -329,16 +391,21 @@ pub struct CenterLinePrimitive {
 impl CenterLinePrimitive {
     pub fn new(dimensions: (MacroDecimal, MacroDecimal)) -> Self {
         CenterLinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             dimensions,
             center: (MacroDecimal::Value(0.0), MacroDecimal::Value(0.0)),
             angle: MacroDecimal::Value(0.0),
         }
     }
 
-    pub fn exposure_on(mut self, exposure: bool) -> Self {
+    pub fn with_exposure(mut self, exposure: MacroBoolean) -> Self {
         self.exposure = exposure;
         self
+    }
+
+    #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    pub fn exposure_on(mut self, exposure: bool) -> Self {
+        self.with_exposure(MacroBoolean::Value(exposure))
     }
 
     pub fn centered_at(mut self, center: (MacroDecimal, MacroDecimal)) -> Self {
@@ -374,7 +441,7 @@ impl<W: Write> PartialGerberCode<W> for CenterLinePrimitive {
 #[derive(Debug, Clone, PartialEq)]
 pub struct OutlinePrimitive {
     /// Exposure off/on (0/1)
-    pub exposure: bool,
+    pub exposure: MacroBoolean,
 
     /// Vector of coordinate pairs.
     ///
@@ -392,7 +459,7 @@ pub struct OutlinePrimitive {
 impl OutlinePrimitive {
     pub fn new() -> Self {
         OutlinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             points: Vec::new(),
             angle: MacroDecimal::Value(0.0),
         }
@@ -455,10 +522,10 @@ impl<W: Write> PartialGerberCode<W> for OutlinePrimitive {
 /// the center point and the diameter of the circumscribed circle.
 pub struct PolygonPrimitive {
     /// Exposure off/on (0/1)
-    pub exposure: bool,
+    pub exposure: MacroBoolean,
 
     /// Number of vertices n, 3 <= n <= 12
-    pub vertices: u8,
+    pub vertices: MacroInteger,
 
     /// X and Y coordinates of center point, decimals
     pub center: (MacroDecimal, MacroDecimal),
@@ -479,9 +546,9 @@ pub struct PolygonPrimitive {
 }
 
 impl PolygonPrimitive {
-    pub fn new(vertices: u8) -> Self {
+    pub fn new(vertices: MacroInteger) -> Self {
         PolygonPrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             vertices,
             center: (MacroDecimal::Value(0.0), MacroDecimal::Value(0.0)),
             diameter: MacroDecimal::Value(0.0),
@@ -489,9 +556,14 @@ impl PolygonPrimitive {
         }
     }
 
-    pub fn exposure_on(mut self, exposure: bool) -> Self {
+    pub fn with_exposure(mut self, exposure: MacroBoolean) -> Self {
         self.exposure = exposure;
         self
+    }
+
+    #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    pub fn exposure_on(mut self, exposure: bool) -> Self {
+        self.with_exposure(MacroBoolean::Value(exposure))
     }
 
     pub fn centered_at(mut self, center: (MacroDecimal, MacroDecimal)) -> Self {
@@ -513,12 +585,12 @@ impl PolygonPrimitive {
 impl<W: Write> PartialGerberCode<W> for PolygonPrimitive {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         // Vertice count invariants
-        if self.vertices < 3 {
+        if matches!(self.vertices, MacroInteger::Value(value) if value < 3) {
             return Err(GerberError::MissingDataError(
                 "There must be at least 3 vertices in a polygon".into(),
             ));
         }
-        if self.vertices > 12 {
+        if matches!(self.vertices, MacroInteger::Value(value) if value > 12) {
             return Err(GerberError::RangeError(
                 "The maximum number of vertices in a polygon is 12".into(),
             ));
@@ -530,7 +602,9 @@ impl<W: Write> PartialGerberCode<W> for PolygonPrimitive {
         }
         write!(writer, "5,")?;
         self.exposure.serialize_partial(writer)?;
-        write!(writer, ",{},", self.vertices)?;
+        write!(writer, ",")?;
+        self.vertices.serialize_partial(writer)?;
+        write!(writer, ",")?;
         self.center.0.serialize_partial(writer)?;
         write!(writer, ",")?;
         self.center.1.serialize_partial(writer)?;
@@ -803,14 +877,14 @@ mod test {
     #[test]
     fn test_circle_primitive_codegen() {
         let with_angle = CirclePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             diameter: Value(1.5),
             center: (Value(0.), Value(0.)),
             angle: Some(Value(0.)),
         };
         assert_partial_code!(with_angle, "1,1,1.5,0,0,0*");
         let no_angle = CirclePrimitive {
-            exposure: false,
+            exposure: MacroBoolean::Value(false),
             diameter: Value(99.9),
             center: (Value(1.1), Value(2.2)),
             angle: None,
@@ -821,7 +895,7 @@ mod test {
     #[test]
     fn test_vector_line_primitive_codegen() {
         let line = VectorLinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             width: Value(0.9),
             start: (Value(0.), Value(0.45)),
             end: (Value(12.), Value(0.45)),
@@ -833,7 +907,7 @@ mod test {
     #[test]
     fn test_center_line_primitive_codegen() {
         let line = CenterLinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             dimensions: (Value(6.8), Value(1.2)),
             center: (Value(3.4), Value(0.6)),
             angle: Value(30.0),
@@ -844,7 +918,7 @@ mod test {
     #[test]
     fn test_outline_primitive_codegen() {
         let line = OutlinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             points: vec![
                 (Value(0.1), Value(0.1)),
                 (Value(0.5), Value(0.1)),
@@ -863,8 +937,8 @@ mod test {
     #[test]
     fn test_polygon_primitive_codegen() {
         let line = PolygonPrimitive {
-            exposure: true,
-            vertices: 8,
+            exposure: MacroBoolean::Value(true),
+            vertices: MacroInteger::Value(8),
             center: (Value(1.5), Value(2.0)),
             diameter: Value(8.0),
             angle: Value(0.0),
@@ -929,7 +1003,7 @@ mod test {
     #[test]
     fn test_codegen_with_variable() {
         let line = VectorLinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             width: Variable(0),
             start: (Variable(1), 0.45.into()),
             end: (Value(12.), Expression("$2x4".to_string())),
@@ -976,7 +1050,7 @@ mod test {
     fn test_circle_primitive_new() {
         let c1 = CirclePrimitive::new(Value(3.0)).centered_at((Value(5.0), Value(0.0)));
         let c2 = CirclePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             diameter: Value(3.0),
             center: (Value(5.0), Value(0.0)),
             angle: None,
@@ -989,7 +1063,7 @@ mod test {
         let vl1 = VectorLinePrimitive::new((Value(0.0), Value(5.3)), (Value(3.9), Value(8.5)))
             .with_angle(Value(38.0));
         let vl2 = VectorLinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             width: Value(0.0),
             start: (Value(0.0), Value(5.3)),
             end: (Value(3.9), Value(8.5)),
@@ -1002,7 +1076,7 @@ mod test {
     fn test_centerline_primitive_new() {
         let cl1 = CenterLinePrimitive::new((Value(3.0), Value(4.5))).exposure_on(false);
         let cl2 = CenterLinePrimitive {
-            exposure: false,
+            exposure: MacroBoolean::Value(false),
             dimensions: (Value(3.0), Value(4.5)),
             center: (Value(0.0), Value(0.0)),
             angle: Value(0.0),
@@ -1026,7 +1100,7 @@ mod test {
         ];
 
         let op2 = OutlinePrimitive {
-            exposure: true,
+            exposure: MacroBoolean::Value(true),
             points: pts,
             angle: Value(0.0),
         };
@@ -1035,13 +1109,13 @@ mod test {
 
     #[test]
     fn test_polygon_primitive_new() {
-        let pp1 = PolygonPrimitive::new(5)
+        let pp1 = PolygonPrimitive::new(MacroInteger::Value(5))
             .with_angle(Value(98.0))
             .with_diameter(Value(5.3))
             .centered_at((Value(1.0), Value(1.0)));
         let pp2 = PolygonPrimitive {
-            exposure: true,
-            vertices: 5,
+            exposure: MacroBoolean::Value(true),
+            vertices: MacroInteger::Value(5),
             angle: Value(98.0),
             diameter: Value(5.3),
             center: (Value(1.0), Value(1.0)),
