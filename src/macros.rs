@@ -868,8 +868,8 @@ impl<W: Write> PartialGerberCode<W> for ThermalPrimitive {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VariableDefinition {
-    number: u32,
-    expression: String,
+    pub number: u32,
+    pub expression: String,
 }
 
 impl VariableDefinition {
