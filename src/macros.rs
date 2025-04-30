@@ -283,6 +283,7 @@ impl CirclePrimitive {
     }
 
     #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    #[allow(unused_mut)]
     pub fn exposure_on(mut self, exposure: bool) -> Self {
         self.with_exposure(MacroBoolean::Value(exposure))
     }
@@ -351,6 +352,7 @@ impl VectorLinePrimitive {
     }
 
     #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    #[allow(unused_mut)]
     pub fn exposure_on(mut self, exposure: bool) -> Self {
         self.with_exposure(MacroBoolean::Value(exposure))
     }
@@ -422,6 +424,7 @@ impl CenterLinePrimitive {
     }
 
     #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    #[allow(unused_mut)]
     pub fn exposure_on(mut self, exposure: bool) -> Self {
         self.with_exposure(MacroBoolean::Value(exposure))
     }
@@ -580,6 +583,7 @@ impl PolygonPrimitive {
     }
 
     #[deprecated(since = "0.4.0", note = "Use `with_exposure` instead")]
+    #[allow(unused_mut)]
     pub fn exposure_on(mut self, exposure: bool) -> Self {
         self.with_exposure(MacroBoolean::Value(exposure))
     }
@@ -1092,7 +1096,7 @@ mod test {
 
     #[test]
     fn test_centerline_primitive_new() {
-        let cl1 = CenterLinePrimitive::new((Value(3.0), Value(4.5))).exposure_on(false);
+        let cl1 = CenterLinePrimitive::new((Value(3.0), Value(4.5))).with_exposure(MacroBoolean::Value(false));
         let cl2 = CenterLinePrimitive {
             exposure: MacroBoolean::Value(false),
             dimensions: (Value(3.0), Value(4.5)),
