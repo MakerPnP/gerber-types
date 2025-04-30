@@ -127,6 +127,36 @@ impl<W: Write> PartialGerberCode<W> for MacroBoolean {
     }
 }
 
+impl From<MacroDecimal> for MacroBoolean {
+    fn from(value: MacroDecimal) -> Self {
+        match value {
+            MacroDecimal::Value(decimal) => Self::Value(decimal == 1.0),
+            MacroDecimal::Variable(variable) => Self::Variable(variable),
+            MacroDecimal::Expression(expressions) => Self::Expression(expressions),
+        }
+    }
+}
+
+#[test]
+fn test_macro_boolean_from_decimal() {
+    assert_eq!(
+        MacroBoolean::from(MacroDecimal::Value(1.0)),
+        MacroBoolean::Value(true)
+    );
+    assert_eq!(
+        MacroBoolean::from(MacroDecimal::Value(0.0)),
+        MacroBoolean::Value(false)
+    );
+    assert_eq!(
+        MacroBoolean::from(MacroDecimal::Variable(42)),
+        MacroBoolean::Variable(42)
+    );
+    assert_eq!(
+        MacroBoolean::from(MacroDecimal::Expression("$1x$2".to_string())),
+        MacroBoolean::Expression("$1x$2".to_string())
+    );
+}
+
 /// Gerber specification (2021.02 - 2024.05) 3.4.1 Integers
 /// "Integers must fit in a 32-bit signed integer"
 #[derive(Debug, Clone, PartialEq)]

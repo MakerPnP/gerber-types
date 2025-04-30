@@ -251,7 +251,14 @@ mod test {
         };
         let m2 = ApertureDefinition {
             code: 69,
-            aperture: Aperture::Macro("With_Args2".to_string(), Some("$1X0.25X$1x$2".to_string())),
+            aperture: Aperture::Macro(
+                "With_Args2".to_string(),
+                Some(vec![
+                    MacroDecimal::Variable(1),
+                    MacroDecimal::Value(0.25),
+                    MacroDecimal::Expression("$1x$2".to_string()),
+                ]),
+            ),
         };
         assert_partial_code!(m1, "42NO_ARGS1");
         assert_partial_code!(m2, "69With_Args2,$1X0.25X$1x$2");
