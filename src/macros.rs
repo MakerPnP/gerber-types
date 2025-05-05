@@ -64,6 +64,13 @@ pub enum MacroDecimal {
     Value(f64),
     /// A variable placeholder.
     Variable(u32),
+    /// An expression placeholder, e.g. "$3+($4/2)" or "$1x4".
+    ///
+    /// Gerber spec (4.5.4.2 Arithmetic Expressions) says:
+    /// "The standard arithmetic precedence rules apply". i.e. *not* Rust/C precedence rules.
+    /// Allowed elements: "integer and decimal constants, other variables, arithmetic operators and the brackets '(' and ')'"
+    /// Allowed operators: '+', '-', 'x' (lower case), '/'.
+    Expression(String),
 }
 
 impl MacroDecimal {
@@ -71,6 +78,7 @@ impl MacroDecimal {
         match *self {
             MacroDecimal::Value(v) => v < 0.0,
             MacroDecimal::Variable(_) => false,
+            MacroDecimal::Expression(_) => false,
         }
     }
 }
@@ -92,6 +100,7 @@ impl<W: Write> PartialGerberCode<W> for MacroDecimal {
         match *self {
             MacroDecimal::Value(ref v) => write!(writer, "{}", v)?,
             MacroDecimal::Variable(ref v) => write!(writer, "${}", v)?,
+            MacroDecimal::Expression(ref v) => write!(writer, "{}", v)?,
         };
         Ok(())
     }
@@ -777,7 +786,7 @@ mod test {
 
     use crate::traits::PartialGerberCode;
 
-    use super::MacroDecimal::{Value, Variable};
+    use super::MacroDecimal::{Expression, Value, Variable};
     use super::*;
 
     macro_rules! assert_partial_code {
@@ -916,16 +925,17 @@ mod test {
         );
     }
 
+    /// This test should use at least one each of the enum variants in [`MacroDecimal`]
     #[test]
     fn test_codegen_with_variable() {
         let line = VectorLinePrimitive {
             exposure: true,
             width: Variable(0),
             start: (Variable(1), 0.45.into()),
-            end: (Value(12.), Variable(2)),
+            end: (Value(12.), Expression("$2x4".to_string())),
             angle: Variable(3),
         };
-        assert_partial_code!(line, "20,1,$0,$1,0.45,12,$2,$3*");
+        assert_partial_code!(line, "20,1,$0,$1,0.45,12,$2x4,$3*");
     }
 
     #[test]
