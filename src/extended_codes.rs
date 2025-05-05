@@ -4,6 +4,7 @@ use std::io::Write;
 
 use crate::errors::GerberResult;
 use crate::traits::PartialGerberCode;
+use crate::MacroDecimal;
 
 // Unit
 
@@ -53,7 +54,15 @@ pub enum Aperture {
     Rectangle(Rectangular),
     Obround(Rectangular),
     Polygon(Polygon),
-    Other(String),
+
+    /// gerber spec (2024.05) 4.3.1 "AD Command" - "Parameters are decimals."
+    ///
+    /// Note: this definition conflicts with:
+    /// a) the [`MacroBoolean`] which is used for the exposure parameter for macro primitives.
+    /// b) the [`MacroInteger`] which is used for the '# vertices' parameter for macro primitives.
+    ///
+    /// Conversion functions from MacroDecimal to [`MacroBoolean`] & [`MacroInteger`] are required.  
+    Macro(String, Option<Vec<MacroDecimal>>),
 }
 
 impl<W: Write> PartialGerberCode<W> for Aperture {
@@ -75,7 +84,18 @@ impl<W: Write> PartialGerberCode<W> for Aperture {
                 write!(writer, "P,")?;
                 polygon.serialize_partial(writer)?;
             }
-            Aperture::Other(ref string) => write!(writer, "{}", string)?,
+            Aperture::Macro(ref string, ref args) => {
+                write!(writer, "{}", string)?;
+                if let Some(ref args) = *args {
+                    write!(writer, ",")?;
+                    for (index, arg) in args.iter().enumerate() {
+                        if index > 0 {
+                            write!(writer, "X")?;
+                        }
+                        arg.serialize_partial(writer)?;
+                    }
+                }
+            }
         };
         Ok(())
     }

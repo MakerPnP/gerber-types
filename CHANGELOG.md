@@ -14,6 +14,12 @@ Possible log types:
 ### v0.4.0 (2025-04-29) - (unreleased)
 
 - [added] Support for macro expressions.  See `MacroDecimal`.
+- [added] `MacroBoolean`.
+- [added] `MacroInteger`.
+- [changed] Replaced `Aperture::Other` with `Aperture::Macro`, the latter having option arguments.
+- [changed] Use `MacroBoolean` instead of `bool` for `exposure` on macro primitives.
+- [changed] `PolygonPrimitive::new` uses a `MacroInteger` for the `vertices` argument.
+- [deprecated] `*Primitive::exposure_on`, replaced with `*Primitive::with_exposure`.
 
 ### v0.3.0 (2022-07-05)
 

@@ -110,12 +110,12 @@ fn main() {
         .into(),
         ExtendedCode::ApertureDefinition(ApertureDefinition {
             code: 18,
-            aperture: Aperture::Other("TARGET125".to_string()),
+            aperture: Aperture::Macro("TARGET125".to_string(), None),
         })
         .into(),
         ExtendedCode::ApertureDefinition(ApertureDefinition {
             code: 19,
-            aperture: Aperture::Other("THERMAL80".to_string()),
+            aperture: Aperture::Macro("THERMAL80".to_string(), None),
         })
         .into(),
         FunctionCode::GCode(GCode::Comment("Start image generation".to_string())).into(),

@@ -33,7 +33,6 @@ mod traits;
 mod types;
 
 pub use crate::attributes::*;
-pub use crate::codegen::*;
 pub use crate::coordinates::*;
 pub use crate::errors::*;
 pub use crate::extended_codes::*;
@@ -241,6 +240,27 @@ mod test {
         assert_partial_code!(ad1, "15P,4.5X3");
         assert_partial_code!(ad2, "16P,5X4X30.6");
         assert_partial_code!(ad3, "17P,5.5X5X0X1.8");
+    }
+
+    #[test]
+    fn test_aperture_macro_definition() {
+        let m1 = ApertureDefinition {
+            code: 42,
+            aperture: Aperture::Macro("NO_ARGS1".to_string(), None),
+        };
+        let m2 = ApertureDefinition {
+            code: 69,
+            aperture: Aperture::Macro(
+                "With_Args2".to_string(),
+                Some(vec![
+                    MacroDecimal::Variable(1),
+                    MacroDecimal::Value(0.25),
+                    MacroDecimal::Expression("$1x$2".to_string()),
+                ]),
+            ),
+        };
+        assert_partial_code!(m1, "42NO_ARGS1");
+        assert_partial_code!(m2, "69With_Args2,$1X0.25X$1x$2");
     }
 
     #[test]
