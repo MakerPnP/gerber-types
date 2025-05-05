@@ -1,47 +1,47 @@
 # Rust Gerber Library
-
 [![Build status][build-status-badge]][build-status]
 [![Crates.io][crates-io-badge]][crates-io]
+[![MakerPnP Discord][discord-badge]][discord]
 
 - [Docs (released)](https://docs.rs/gerber-types/)
 
-This crate implements the basic building blocks of Gerber X2 (compatible with
-Gerber RS-274X) code. It focusses on the low level types (to be used like an
-AST) and code generation and does not do any semantic checking.
+This crate implements the basic building blocks of Gerber X2 (compatible with Gerber RS-274X) code. It focuses on the
+low-level types (to be used like an AST) and code generation and does not do any semantic checking.
 
-For example, you can use an aperture without defining it. This will generate
-syntactically valid but semantially invalid Gerber code, but this module won't
-complain.
-
-The plan is to write a high-level wrapper library on top of this. Early drafts
-[are in progress](https://github.com/dbrgn/gerber-rs) but the design isn't
-fixed yet.
+For example, you can use an aperture without defining it. This will generate syntactically valid but semantically
+invalid Gerber code, but this module won't complain.
 
 Current Gerber X2 spec: https://www.ucamco.com/files/downloads/file/81/the_gerber_file_format_specification.pdf
 
 ## Example
 
-You can find an example in the [`examples`
-directory](https://github.com/dbrgn/gerber-types-rs/blob/main/examples/polarities-apertures.rs).
-It's still quite verbose, the goal is to make the API a bit more ergonomic in
-the future. (This library has a low-level focus though, so it will never get a
-high-level API. That is the task of other libraries.)
+You can find an example in the [`examples` directory](https://github.com/MakerPnP/gerber-types-rs/blob/main/examples/polarities-apertures.rs).
+
+This library has a low-level focus and is quite verbose.  Other external crates can provide a high-level API.
 
 To generate Gerber code for that example:
 
     $ cargo run --example polarities-apertures
 
+## Authors
+
+* Danilo Bargen - Original author.
+* Dominic Clifton - Current maintainer (2025/05/05 onwards).
+
+See the [contributors](https://github.com/MakerPnP/gerber-types-rs/graphs/contributors) page on github for full list.
+
 ## License
 
-Licensed under either of
+Licensed under _either_ of the following licenses, at your option. 
 
  * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
  * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
-at your option.
-
 <!-- Badges -->
-[build-status]: https://github.com/dbrgn/gerber-types-rs/actions?query=workflow%3ACI
-[build-status-badge]: https://img.shields.io/github/workflow/status/dbrgn/gerber-types-rs/CI/main
+
+[build-status]: https://github.com/makerpnp/gerber-types-rs/actions/workflows/ci.yml
+[build-status-badge]: https://github.com/makerpnp/gerber-types-rs/workflows/CI/badge.svg
 [crates-io]: https://crates.io/crates/gerber-types
 [crates-io-badge]: https://img.shields.io/crates/v/gerber-types.svg
+[discord]: https://discord.gg/ffwj5rKZuf
+[discord-badge]: https://img.shields.io/discord/1255867192503832688?label=MakerPnP%20discord&color=%2332c955 

@@ -2,9 +2,12 @@
 name = "gerber-types"
 version = "0.3.0"
 documentation = "https://docs.rs/gerber-types/"
-repository = "https://github.com/dbrgn/gerber-types-rs"
+repository = "https://github.com/MakerPnP/gerber-types-rs"
 license = "MIT OR Apache-2.0"
-authors = ["Danilo Bargen <mail@dbrgn.ch>"]
+authors = [
+    "Danilo Bargen <mail@dbrgn.ch>",
+    "Dominic Clifton <me@dominicclifton.name>"
+]
 description = "Types and code generation for Gerber files (RS-274X)."
 readme = "README.md"
 keywords = ["gerber", "pcb", "rs274x", "cad", "cam"]
