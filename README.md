@@ -5,13 +5,11 @@
 
 - [Docs (released)](https://docs.rs/gerber-types/)
 
-This crate implements the basic building blocks of Gerber X2 (compatible with
-Gerber RS-274X) code. It focuses on the low-level types (to be used like an
-AST) and code generation and does not do any semantic checking.
+This crate implements the basic building blocks of Gerber X2 (compatible with Gerber RS-274X) code. It focuses on the
+low-level types (to be used like an AST) and code generation and does not do any semantic checking.
 
-For example, you can use an aperture without defining it. This will generate
-syntactically valid but semantically invalid Gerber code, but this module won't
-complain.
+For example, you can use an aperture without defining it. This will generate syntactically valid but semantically
+invalid Gerber code, but this module won't complain.
 
 Current Gerber X2 spec: https://www.ucamco.com/files/downloads/file/81/the_gerber_file_format_specification.pdf
 
@@ -34,12 +32,10 @@ See the [contributors](https://github.com/MakerPnP/gerber-types-rs/graphs/contri
 
 ## License
 
-Licensed under _either_ of:
+Licensed under _either_ of the following licenses, at your option. 
 
  * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
  * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
 
 <!-- Badges -->
 
