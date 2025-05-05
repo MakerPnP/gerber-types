@@ -1,7 +1,7 @@
 # Rust Gerber Library
-
 [![Build status][build-status-badge]][build-status]
 [![Crates.io][crates-io-badge]][crates-io]
+[![MakerPnP Discord][discord-badge]][discord]
 
 - [Docs (released)](https://docs.rs/gerber-types/)
 
@@ -42,7 +42,10 @@ Licensed under _either_ of:
 at your option.
 
 <!-- Badges -->
-[build-status]: https://github.com/MakerPnP/gerber-types-rs/actions?query=workflow%3ACI
-[build-status-badge]: https://img.shields.io/github/workflow/status/MakerPnP/gerber-types-rs/CI/main
+
+[build-status]: https://github.com/makerpnp/gerber-types-rs/actions/workflows/ci.yml
+[build-status-badge]: https://github.com/makerpnp/gerber-types-rs/workflows/CI/badge.svg
 [crates-io]: https://crates.io/crates/gerber-types
 [crates-io-badge]: https://img.shields.io/crates/v/gerber-types.svg
+[discord]: https://discord.gg/ffwj5rKZuf
+[discord-badge]: https://img.shields.io/discord/1255867192503832688?label=MakerPnP%20discord&color=%2332c955 
