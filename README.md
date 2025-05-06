@@ -23,6 +23,28 @@ To generate Gerber code for that example:
 
     $ cargo run --example polarities-apertures
 
+## Related crates
+
+### Gerber Parser
+
+A rust crate for parsing gerber files that uses this crate as a dependency:
+
+Crates.io: https://crates.io/crates/gerber_parser
+Github: https://github.com/NemoAndrea/gerber-parser
+
+### Gerber Viewer
+
+A rust crate for rendering gerber layers, also uses this crate as a dependency:
+
+Github: https://github.com/MakerPnP/gerber_viewer
+
+## Related projects
+
+For a list of other projects that use this crate you can check the github 'dependents' page.
+
+https://github.com/MakerPnP/gerber-types-rs/network/dependents
+
+
 ## Authors
 
 * Danilo Bargen - Original author.
