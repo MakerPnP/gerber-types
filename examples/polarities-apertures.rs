@@ -1,7 +1,7 @@
 //! Example from spec chapter 2.12.2
 use std::io::stdout;
 
-use conv::TryFrom;
+use std::convert::TryFrom;
 
 use gerber_types::*;
 

@@ -4,8 +4,8 @@ use std::convert::{From, Into};
 use std::i64;
 use std::io::Write;
 use std::num::FpCategory;
+use std::convert::TryFrom;
 
-use conv::TryFrom;
 use num_rational::Ratio;
 
 use crate::errors::{GerberError, GerberResult};
@@ -74,8 +74,8 @@ const DECIMAL_PLACES_CHARS: u8 = 6;
 const DECIMAL_PLACES_FACTOR: i64 = 1_000_000;
 
 impl TryFrom<f64> for CoordinateNumber {
-    type Err = GerberError;
-    fn try_from(val: f64) -> Result<Self, Self::Err> {
+    type Error = GerberError;
+    fn try_from(val: f64) -> Result<Self, Self::Error> {
         match val.classify() {
             FpCategory::Nan => Err(GerberError::ConversionError("Value is NaN".into())),
             FpCategory::Infinite => Err(GerberError::ConversionError("Value is infinite".into())),
@@ -244,7 +244,7 @@ mod test {
     use std::f64;
     use std::io::BufWriter;
 
-    use conv::TryFrom;
+    use std::convert::TryFrom;
 
     use crate::traits::PartialGerberCode;
 
