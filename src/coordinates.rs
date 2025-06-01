@@ -1,10 +1,10 @@
 //! Types for Gerber code generation related to coordinates.
 
+use std::convert::TryFrom;
 use std::convert::{From, Into};
 use std::i64;
 use std::io::Write;
 use std::num::FpCategory;
-use std::convert::TryFrom;
 
 use num_rational::Ratio;
 
