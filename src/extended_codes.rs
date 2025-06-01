@@ -8,7 +8,7 @@ use crate::MacroDecimal;
 
 // Unit
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Unit {
     Inches,
     Millimeters,
@@ -331,5 +331,15 @@ mod test {
             hole_diameter: None,
         };
         assert_eq!(p1, p2);
+    }
+
+    /// This test is to ensure that the `Unit` enum is hashable.
+    #[test]
+    fn unit_in_hashmap() {
+        let mut map = std::collections::HashMap::new();
+        map.insert(Unit::Inches, ());
+        map.insert(Unit::Millimeters, ());
+
+        assert_eq!(map.len(), 2);
     }
 }
