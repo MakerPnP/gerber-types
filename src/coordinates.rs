@@ -122,6 +122,58 @@ impl_from_integer!(i32);
 impl_from_integer!(u8);
 impl_from_integer!(u16);
 
+// Define a new trait for types that can be converted into an Option<CoordinateNumber>
+pub trait IntoOptionalCoordinate {
+    fn into_optional_coordinate(self) -> Option<CoordinateNumber>;
+}
+
+// Implement for CoordinateNumber
+impl IntoOptionalCoordinate for CoordinateNumber {
+    fn into_optional_coordinate(self) -> Option<CoordinateNumber> {
+        Some(self)
+    }
+}
+
+impl IntoOptionalCoordinate for Option<CoordinateNumber> {
+    fn into_optional_coordinate(self) -> Option<CoordinateNumber> {
+        self
+    }
+}
+
+macro_rules! impl_from_optional_integer {
+    ($class:ty) => {
+        // Implement for integer types
+        impl IntoOptionalCoordinate for $class {
+            fn into_optional_coordinate(self) -> Option<CoordinateNumber> {
+                Some(CoordinateNumber::from(self))
+            }
+        }
+    };
+}
+
+impl_from_optional_integer!(i8);
+impl_from_optional_integer!(i16);
+impl_from_optional_integer!(i32);
+impl_from_optional_integer!(u8);
+impl_from_optional_integer!(u16);
+
+// Add implementations for Option<integer> types
+macro_rules! impl_from_option_integer {
+    ($class:ty) => {
+        impl IntoOptionalCoordinate for Option<$class> {
+            fn into_optional_coordinate(self) -> Option<CoordinateNumber> {
+                self.map(CoordinateNumber::from)
+            }
+        }
+    };
+}
+
+impl_from_option_integer!(i8);
+impl_from_option_integer!(i16);
+impl_from_option_integer!(i32);
+impl_from_option_integer!(u8);
+impl_from_option_integer!(u16);
+
 impl CoordinateNumber {
     pub fn gerber(&self, format: &CoordinateFormat) -> Result<String, GerberError> {
         if format.decimal > DECIMAL_PLACES_CHARS {
@@ -155,22 +207,22 @@ pub struct Coordinates {
 impl Coordinates {
     pub fn new<T, U>(x: T, y: U, format: CoordinateFormat) -> Self
     where
-        T: Into<CoordinateNumber>,
-        U: Into<CoordinateNumber>,
+        T: IntoOptionalCoordinate,
+        U: IntoOptionalCoordinate,
     {
         Coordinates {
-            x: Some(x.into()),
-            y: Some(y.into()),
+            x: x.into_optional_coordinate(),
+            y: y.into_optional_coordinate(),
             format,
         }
     }
 
     pub fn at_x<T>(x: T, format: CoordinateFormat) -> Self
     where
-        T: Into<CoordinateNumber>,
+        T: IntoOptionalCoordinate,
     {
         Coordinates {
-            x: Some(x.into()),
+            x: x.into_optional_coordinate(),
             y: None,
             format,
         }
@@ -178,11 +230,11 @@ impl Coordinates {
 
     pub fn at_y<T>(y: T, format: CoordinateFormat) -> Self
     where
-        T: Into<CoordinateNumber>,
+        T: IntoOptionalCoordinate,
     {
         Coordinates {
             x: None,
-            y: Some(y.into()),
+            y: y.into_optional_coordinate(),
             format,
         }
     }
@@ -202,22 +254,22 @@ pub struct CoordinateOffset {
 impl CoordinateOffset {
     pub fn new<T, U>(x: T, y: U, format: CoordinateFormat) -> Self
     where
-        T: Into<CoordinateNumber>,
-        U: Into<CoordinateNumber>,
+        T: IntoOptionalCoordinate,
+        U: IntoOptionalCoordinate,
     {
         CoordinateOffset {
-            x: Some(x.into()),
-            y: Some(y.into()),
+            x: x.into_optional_coordinate(),
+            y: y.into_optional_coordinate(),
             format,
         }
     }
 
     pub fn at_x<T>(x: T, format: CoordinateFormat) -> Self
     where
-        T: Into<CoordinateNumber>,
+        T: IntoOptionalCoordinate,
     {
         CoordinateOffset {
-            x: Some(x.into()),
+            x: x.into_optional_coordinate(),
             y: None,
             format,
         }
@@ -225,11 +277,11 @@ impl CoordinateOffset {
 
     pub fn at_y<T>(y: T, format: CoordinateFormat) -> Self
     where
-        T: Into<CoordinateNumber>,
+        T: IntoOptionalCoordinate,
     {
         CoordinateOffset {
             x: None,
-            y: Some(y.into()),
+            y: y.into_optional_coordinate(),
             format,
         }
     }
@@ -423,6 +475,38 @@ mod test {
     }
 
     #[test]
+    fn test_coordinates_into_option_some() {
+        let cf = CoordinateFormat::new(2, 4);
+        let c1 = Coordinates::new(CoordinateNumber::from(1), CoordinateNumber::from(2), cf);
+        let c2 = Coordinates::new(Some(1), Some(2), cf);
+        assert_eq!(c1, c2);
+    }
+
+    #[test]
+    fn test_coordinates_into_option_none() {
+        let cf = CoordinateFormat::new(2, 4);
+        let c1 = Coordinates {
+            x: None,
+            y: None,
+            format: cf,
+        };
+        let c2 = Coordinates::new::<Option<i8>, Option<i8>>(None, None, cf);
+        assert_eq!(c1, c2);
+    }
+
+    #[test]
+    fn test_coordinates_into_option_partial() {
+        let cf = CoordinateFormat::new(2, 4);
+        let c1 = Coordinates {
+            x: Some(CoordinateNumber::from(1_i32)),
+            y: None,
+            format: cf,
+        };
+        let c2 = Coordinates::new::<Option<i32>, Option<i32>>(Some(1_i32), None, cf);
+        assert_eq!(c1, c2);
+    }
+
+    #[test]
     fn test_coordinates_into_mixed() {
         let cf = CoordinateFormat::new(2, 4);
         let c1 = Coordinates::new(CoordinateNumber::from(1), 2, cf);
@@ -449,8 +533,11 @@ mod test {
             ""
         ); // TODO should we catch this?
         assert_coords!(Coordinates::at_x(10, cf44), "X100000");
+        assert_coords!(Coordinates::at_x(Some(10), cf44), "X100000");
         assert_coords!(Coordinates::at_y(20, cf46), "Y20000000");
+        assert_coords!(Coordinates::at_y(Some(20), cf46), "Y20000000");
         assert_coords!(Coordinates::new(0, -400, cf44), "X0Y-4000000");
+        assert_coords!(Coordinates::new(Some(0), Some(-400), cf44), "X0Y-4000000");
     }
 
     #[test]
@@ -472,8 +559,14 @@ mod test {
             },
             ""
         ); // TODO should we catch this?
+        assert_coords!(CoordinateOffset::at_x(Some(10), cf66), "I10000000");
         assert_coords!(CoordinateOffset::at_x(10, cf66), "I10000000");
+        assert_coords!(CoordinateOffset::at_y(Some(20), cf55), "J2000000");
         assert_coords!(CoordinateOffset::at_y(20, cf55), "J2000000");
         assert_coords!(CoordinateOffset::new(0, -400, cf44), "I0J-4000000");
+        assert_coords!(
+            CoordinateOffset::new(Some(0), Some(-400), cf44),
+            "I0J-4000000"
+        );
     }
 }
