@@ -11,7 +11,7 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### v0.4.0 (2025-05-30) - (unreleased)
+### v0.4.0 (2025-06-03) - (unreleased)
 
 - [added] Support for macro expressions.  See `MacroDecimal`.
 - [added] `MacroBoolean`.
@@ -20,6 +20,8 @@ Possible log types:
 - [changed] Use `MacroBoolean` instead of `bool` for `exposure` on macro primitives.
 - [changed] `PolygonPrimitive::new` uses a `MacroInteger` for the `vertices` argument.
 - [changed] Replaced dependency on `conv::TryFrom` with `std::convert::TryFrom` (since TryFrom was stabilized in Rust 1.34).
+- [changed] Improved the API of `Coordinates`/`CoordinateOffsets` so that it's easier to build partial coordinates by 
+  using a trait to convert from integer types or optional integer types.
 - [deprecated] `*Primitive::exposure_on`, replaced with `*Primitive::with_exposure`.
 
 ### v0.3.0 (2022-07-05)
