@@ -1,8 +1,8 @@
 [package]
-name = "gerber-types"
+name = "gerber_types"
 version = "0.4.0"
 documentation = "https://docs.rs/gerber-types/"
-repository = "https://github.com/MakerPnP/gerber-types-rs"
+repository = "https://github.com/MakerPnP/gerber-types"
 license = "MIT OR Apache-2.0"
 authors = [
     "Danilo Bargen <mail@dbrgn.ch>",

@@ -15,7 +15,7 @@ fn main() {
         ExtendedCode::Unit(Unit::Inches).into(),
         ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(GenerationSoftware::new(
             "Rust Gerber",
-            "gerber-types-rs",
+            "gerber-types",
             Some(VERSION),
         )))
         .into(),
