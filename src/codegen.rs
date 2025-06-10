@@ -86,6 +86,21 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
                 polarity.serialize_partial(writer)?;
                 writeln!(writer, "*%")?;
             }
+            ExtendedCode::LoadMirroring(ref mirroring) => {
+                write!(writer, "%LM")?;
+                mirroring.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::LoadRotation(ref rotation) => {
+                write!(writer, "%LR")?;
+                rotation.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::LoadScaling(ref scaling) => {
+                write!(writer, "%LS")?;
+                scaling.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
             ExtendedCode::StepAndRepeat(ref sar) => {
                 write!(writer, "%SR")?;
                 sar.serialize_partial(writer)?;
