@@ -1,12 +1,32 @@
 //! Attributes.
 
+use chrono::{DateTime, FixedOffset};
 use std::io::Write;
-
-use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::errors::GerberResult;
 use crate::traits::PartialGerberCode;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Ident {
+    Guid(Uuid),
+    Name(String),
+}
+
+impl<W: Write> PartialGerberCode<W> for Ident {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            Ident::Guid(guid) => {
+                write!(writer, "{}", guid)?;
+            }
+            Ident::Name(value) => {
+                write!(writer, "{}", value)?;
+            }
+        }
+
+        Ok(())
+    }
+}
 
 // FileAttribute
 
@@ -15,8 +35,9 @@ pub enum FileAttribute {
     Part(Part),
     FileFunction(FileFunction),
     FilePolarity(FilePolarity),
+    SameCoordinates(Ident),
+    CreationDate(DateTime<FixedOffset>),
     GenerationSoftware(GenerationSoftware),
-    CreationDate(DateTime<Utc>),
     ProjectId {
         id: String,
         guid: Uuid,
@@ -25,13 +46,13 @@ pub enum FileAttribute {
     Md5(String),
     UserDefined {
         name: String,
-        value: Vec<String>,
+        values: Vec<String>,
     },
 }
 
 impl<W: Write> PartialGerberCode<W> for FileAttribute {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
+        match self {
             FileAttribute::Part(ref part) => {
                 write!(writer, "Part,")?;
                 part.serialize_partial(writer)?;
@@ -51,11 +72,41 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                             t.serialize_partial(writer)?;
                         }
                     }
+                    FileFunction::Plated {
+                        from_layer,
+                        to_layer,
+                        drill,
+                        label,
+                    } => {
+                        write!(writer, "Plated,{},{},", from_layer, to_layer)?;
+                        drill.serialize_partial(writer)?;
+                        if let Some(ref l) = label {
+                            write!(writer, ",")?;
+                            l.serialize_partial(writer)?;
+                        }
+                    }
+                    FileFunction::NonPlated {
+                        from_layer,
+                        to_layer,
+                        drill,
+                        label,
+                    } => {
+                        write!(writer, "NonPlated,{},{},", from_layer, to_layer)?;
+                        drill.serialize_partial(writer)?;
+                        if let Some(ref l) = label {
+                            write!(writer, ",")?;
+                            l.serialize_partial(writer)?;
+                        }
+                    }
                     FileFunction::Profile(ref plating) => {
                         write!(writer, "Profile,")?;
                         plating.serialize_partial(writer)?;
                     }
-                    FileFunction::Soldermask { ref pos, ref index } => {
+                    FileFunction::KeepOut(ref pos) => {
+                        write!(writer, "Keepout,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::SolderMask { ref pos, ref index } => {
                         write!(writer, "Soldermask,")?;
                         pos.serialize_partial(writer)?;
                         if let Some(ref i) = index {
@@ -69,19 +120,129 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                             write!(writer, ",{}", *i)?;
                         }
                     }
-                    _ => unimplemented!(),
+                    FileFunction::Component { layer, pos } => {
+                        write!(writer, "Component,L{},", layer)?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::Paste(pos) => {
+                        write!(writer, "Paste,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::Glue(pos) => {
+                        write!(writer, "Glue,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::CarbonMask { pos, index } => {
+                        write!(writer, "Carbonmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::GoldMask { pos, index } => {
+                        write!(writer, "Goldmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::HeatsinkMask { pos, index } => {
+                        write!(writer, "Heatsinkmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::PeelableMask { pos, index } => {
+                        write!(writer, "Peelablemask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::SilverMask { pos, index } => {
+                        write!(writer, "Silvermask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::TinMask { pos, index } => {
+                        write!(writer, "Tinmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::DepthRoute(pos) => {
+                        write!(writer, "Depthrout,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::VCut(pos) => {
+                        write!(writer, "Vcut")?;
+                        if let Some(pos) = pos {
+                            write!(writer, ",")?;
+                            pos.serialize_partial(writer)?;
+                        }
+                    }
+                    FileFunction::ViaFill => {
+                        write!(writer, "Viafill")?;
+                    }
+                    FileFunction::Pads(pos) => {
+                        write!(writer, "Pads,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::Other(value) => {
+                        write!(writer, "Other,{}", value)?;
+                    }
+
+                    // "Drawing layers"
+                    FileFunction::DrillMap => {
+                        write!(writer, "Drillmap")?;
+                    }
+                    FileFunction::FabricationDrawing => {
+                        write!(writer, "FabricationDrawing")?;
+                    }
+                    FileFunction::VCutMap => {
+                        write!(writer, "Vcutmap")?;
+                    }
+                    FileFunction::AssemblyDrawing(pos) => {
+                        write!(writer, "AssemblyDrawing,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::ArrayDrawing => {
+                        write!(writer, "ArrayDrawing")?;
+                    }
+                    FileFunction::OtherDrawing(value) => {
+                        write!(writer, "OtherDrawing,{}", value)?;
+                    }
                 }
-            }
-            FileAttribute::GenerationSoftware(ref gs) => {
-                write!(writer, "GenerationSoftware,")?;
-                gs.serialize_partial(writer)?;
             }
             FileAttribute::FilePolarity(ref p) => {
                 write!(writer, "FilePolarity,")?;
                 p.serialize_partial(writer)?;
             }
+            FileAttribute::SameCoordinates(ident) => {
+                write!(writer, "SameCoordinates")?;
+                ident.serialize_partial(writer)?;
+            }
+            FileAttribute::CreationDate(date) => {
+                write!(writer, "CreationDate,{}", date.to_rfc3339())?;
+            }
+            FileAttribute::GenerationSoftware(ref gs) => {
+                write!(writer, "GenerationSoftware,")?;
+                gs.serialize_partial(writer)?;
+            }
+            FileAttribute::ProjectId { id, guid, revision } => {
+                write!(writer, "ProjectId,{},{},{}", id, guid, revision)?;
+            }
             FileAttribute::Md5(ref hash) => write!(writer, "MD5,{}", hash)?,
-            _ => unimplemented!(),
+            FileAttribute::UserDefined { name, values } => {
+                write!(writer, "{}", name)?;
+                for value in values {
+                    write!(writer, ",{}", value)?;
+                }
+            }
         };
         Ok(())
     }
@@ -357,6 +518,17 @@ pub enum Drill {
     Buried,
 }
 
+impl<W: Write> PartialGerberCode<W> for Drill {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            Drill::ThroughHole => write!(writer, "PTH")?,
+            Drill::Blind => write!(writer, "Blind")?,
+            Drill::Buried => write!(writer, "Buried")?,
+        }
+        Ok(())
+    }
+}
+
 // DrillRouteType
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -364,6 +536,17 @@ pub enum DrillRouteType {
     Drill,
     Route,
     Mixed,
+}
+
+impl<W: Write> PartialGerberCode<W> for DrillRouteType {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            DrillRouteType::Drill => write!(writer, "Drill")?,
+            DrillRouteType::Route => write!(writer, "Rout")?,
+            DrillRouteType::Mixed => write!(writer, "Mixed")?,
+        }
+        Ok(())
+    }
 }
 
 // Profile
@@ -388,50 +571,14 @@ impl<W: Write> PartialGerberCode<W> for Profile {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FileFunction {
+    //
+    // "Data layers"
+    //
     Copper {
         layer: i32,
         pos: ExtendedPosition,
         copper_type: Option<CopperType>,
     },
-    Soldermask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Legend {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Goldmask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Silvermask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Tinmask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Carbonmask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Peelablesoldermask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Glue {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Viatenting(Position),
-    Viafill,
-    Heatsink(Position),
-    Paste(Position),
-    KeepOut(Position),
-    Pads(Position),
-    Scoring(Position),
     Plated {
         from_layer: i32,
         to_layer: i32,
@@ -444,13 +591,62 @@ pub enum FileFunction {
         drill: Drill,
         label: Option<DrillRouteType>,
     },
+    /// Apparently, this should be used instead of `KeepOut` since 2017.11, see "11.15 Revision 2017.11" but this makes no sense
+    /// Since keep-out has a `Position` but Profile does not...
     Profile(Profile),
-    Drillmap,
-    FabricationDrawing,
-    ArrayDrawing,
-    AssemblyDrawing(Position),
-    Drawing(String),
+    KeepOut(Position),
+    SolderMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    Legend {
+        pos: Position,
+        index: Option<i32>,
+    },
+    Component {
+        layer: i32,
+        pos: Position,
+    },
+    Paste(Position),
+    Glue(Position),
+    CarbonMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    GoldMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    HeatsinkMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    PeelableMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    SilverMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    TinMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    DepthRoute(Position),
+    VCut(Option<Position>),
+    /// Contains the via’s that must be filled (usually with some form of epoxy)
+    ViaFill,
+    Pads(Position),
     Other(String),
+
+    // "Drawing layers"
+    DrillMap,
+    FabricationDrawing,
+    VCutMap,
+    AssemblyDrawing(Position),
+    ArrayDrawing,
+    OtherDrawing(String),
 }
 
 // FilePolarity
