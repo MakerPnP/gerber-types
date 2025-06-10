@@ -99,7 +99,11 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
             ExtendedCode::DeleteAttribute(ref attr) => {
                 writeln!(writer, "%TD{}*%", attr)?;
             }
-            _ => unimplemented!(),
+            ExtendedCode::ApertureAttribute(ref aa) => {
+                write!(writer, "%TA")?;
+                aa.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
         };
         Ok(())
     }

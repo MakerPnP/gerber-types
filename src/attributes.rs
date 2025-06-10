@@ -92,7 +92,171 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ApertureAttribute {
     ApertureFunction(ApertureFunction),
-    DrillTolerance { plus: f64, minus: f64 },
+    CustomAttribute(String, Option<String>),
+}
+
+impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            ApertureAttribute::ApertureFunction(ref af) => {
+                write!(writer, ".AperFunction,")?;
+                match af {
+                    // "Drill and rout layers"
+                    ApertureFunction::ViaDrill(ref value) => {
+                        write!(writer, "ViaDrill")?;
+                        if let Some(value) = value {
+                            write!(writer, ",")?;
+                            value.serialize_partial(writer)?;
+                        }
+                    }
+                    ApertureFunction::BackDrill => {
+                        write!(writer, "BackDrill")?;
+                    }
+                    ApertureFunction::ComponentDrill { press_fit } => {
+                        write!(writer, "ComponentDrill")?;
+                        if matches!(press_fit, Some(true)) {
+                            write!(writer, ",PressFit")?;
+                        }
+                    }
+                    ApertureFunction::MechanicalDrill { function } => {
+                        write!(writer, "MechanicalDrill")?;
+                        if let Some(ref function) = function {
+                            write!(writer, ",")?;
+                            match function {
+                                DrillFunction::Tooling => {
+                                    write!(writer, "Tooling")?;
+                                }
+                                DrillFunction::BreakOut => {
+                                    write!(writer, "BreakOut")?;
+                                }
+                                DrillFunction::Other => {
+                                    write!(writer, "Other")?;
+                                }
+                            }
+                        }
+                    }
+                    ApertureFunction::CastellatedDrill => {
+                        write!(writer, "CastellatedDrill")?;
+                    }
+                    ApertureFunction::OtherDrill(ref value) => {
+                        write!(writer, "OtherDrill,{}", value)?;
+                    }
+
+                    // "Copper layers"
+                    ApertureFunction::ComponentPad => {
+                        write!(writer, "ComponentPad")?;
+                    }
+                    ApertureFunction::SmdPad(ref value) => {
+                        write!(writer, "SMDPad,")?;
+                        value.serialize_partial(writer)?;
+                    }
+                    ApertureFunction::BgaPad(ref value) => {
+                        write!(writer, "BGAPad,")?;
+                        value.serialize_partial(writer)?;
+                    }
+                    ApertureFunction::ConnectorPad => {
+                        write!(writer, "ConnectorPad")?;
+                    }
+                    ApertureFunction::HeatsinkPad => {
+                        write!(writer, "HeatsinkPad")?;
+                    }
+                    ApertureFunction::ViaPad => {
+                        write!(writer, "ViaPad")?;
+                    }
+                    ApertureFunction::TestPad => {
+                        write!(writer, "TestPad")?;
+                    }
+                    ApertureFunction::CastellatedPad => {
+                        write!(writer, "CastellatedPad")?;
+                    }
+                    ApertureFunction::FiducialPad(ref value) => {
+                        write!(writer, "FiducialPad,")?;
+                        value.serialize_partial(writer)?;
+                    }
+                    ApertureFunction::ThermalReliefPad => {
+                        write!(writer, "ThermalReliefPad")?;
+                    }
+                    ApertureFunction::WasherPad => {
+                        write!(writer, "WasherPad")?;
+                    }
+                    ApertureFunction::AntiPad => {
+                        write!(writer, "AntiPad")?;
+                    }
+                    ApertureFunction::OtherPad(ref value) => {
+                        write!(writer, "OtherPad,{}", value)?;
+                    }
+                    ApertureFunction::Conductor => {
+                        write!(writer, "Conductor")?;
+                    }
+                    ApertureFunction::EtchedComponent => {
+                        write!(writer, "EtchedComponent")?;
+                    }
+                    ApertureFunction::NonConductor => {
+                        write!(writer, "NonConductor")?;
+                    }
+                    ApertureFunction::CopperBalancing => {
+                        write!(writer, "CopperBalancing")?;
+                    }
+                    ApertureFunction::Border => {
+                        write!(writer, "Border")?;
+                    }
+                    ApertureFunction::OtherCopper(ref value) => {
+                        write!(writer, "OtherCopper,{}", value)?;
+                    }
+
+                    // "Component layers"
+                    ApertureFunction::ComponentMain => {
+                        write!(writer, "ComponentMain")?;
+                    }
+                    ApertureFunction::ComponentOutline(ref value) => {
+                        write!(writer, "ComponentOutline")?;
+                        if let Some(value) = value {
+                            write!(writer, ",")?;
+                            value.serialize_partial(writer)?;
+                        }
+                    }
+                    ApertureFunction::ComponentPin => {
+                        write!(writer, "ComponentPin")?;
+                    }
+
+                    // "All data layers"
+                    ApertureFunction::Profile => {
+                        write!(writer, "Profile")?;
+                    }
+                    ApertureFunction::NonMaterial => {
+                        write!(writer, "NonMaterial")?;
+                    }
+                    ApertureFunction::Material => {
+                        write!(writer, "Material")?;
+                    }
+                    ApertureFunction::Other(value) => {
+                        write!(writer, "Other,{}", value)?;
+                    }
+
+                    // 2024.05 - 8.4 - "Deprecated attribute values"
+                    ApertureFunction::Slot => {
+                        write!(writer, "Slot")?;
+                    }
+                    ApertureFunction::Cavity => {
+                        write!(writer, "Cavity")?;
+                    }
+                    ApertureFunction::CutOut => {
+                        write!(writer, "CutOut")?;
+                    }
+                    ApertureFunction::Drawing => {
+                        write!(writer, "Drawing")?;
+                    }
+                }
+            }
+            ApertureAttribute::CustomAttribute(name, value) => {
+                write!(writer, "{}", name)?;
+                if let Some(value) = value {
+                    write!(writer, ",{}", value)?;
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 // Part
@@ -336,29 +500,21 @@ impl<W: Write> PartialGerberCode<W> for GenerationSoftware {
     }
 }
 
-// ApertureFunction
-
+/// ApertureFunction
+///
+/// 2024.05 - 5.6.10 ".AperFunction"
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ApertureFunction {
-    // Only valid for layers with file function plated or non-plated
-    ViaDrill,
+    // "Drill and rout layers"
+    ViaDrill(Option<IPC4761ViaProtection>),
     BackDrill,
-    ComponentDrill {
-        press_fit: Option<bool>, // TODO is this bool?
-    },
+    ComponentDrill { press_fit: Option<bool> },
+    MechanicalDrill { function: Option<DrillFunction> },
     CastellatedDrill,
-    MechanicalDrill {
-        function: Option<DrillFunction>,
-    },
-    Slot,
-    CutOut,
-    Cavity,
     OtherDrill(String),
 
-    // Only valid for layers with file function copper
-    ComponentPad {
-        press_fit: Option<bool>, // TODO is this bool?
-    },
+    // "Copper layers"
+    ComponentPad,
     SmdPad(SmdPadType),
     BgaPad(SmdPadType),
     ConnectorPad,
@@ -372,18 +528,87 @@ pub enum ApertureFunction {
     AntiPad,
     OtherPad(String),
     Conductor,
+    EtchedComponent,
     NonConductor,
     CopperBalancing,
     Border,
     OtherCopper(String),
 
-    // All layers
+    // "All data layers"
     Profile,
-    NonMaterial,
     Material,
+    NonMaterial,
     Other(String),
+
+    // "Component layers"
+    ComponentMain,
+    ComponentOutline(Option<ComponentOutline>),
+    ComponentPin,
+
+    // 2024.05 - 8.4 - "Deprecated attribute values"
+    Slot,
+    CutOut,
+    Cavity,
+    Drawing,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IPC4761ViaProtection {
+    Ia,
+    Ib,
+    IIa,
+    IIb,
+    IIIa,
+    IIIb,
+    IVa,
+    IVb,
+    V,
+    VI,
+    VII,
+    None,
+}
+
+impl<W: Write> PartialGerberCode<W> for IPC4761ViaProtection {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        let code = match self {
+            IPC4761ViaProtection::Ia => "Ia",
+            IPC4761ViaProtection::Ib => "Ib",
+            IPC4761ViaProtection::IIa => "IIa",
+            IPC4761ViaProtection::IIb => "IIb",
+            IPC4761ViaProtection::IIIa => "IIIa",
+            IPC4761ViaProtection::IIIb => "IIIb",
+            IPC4761ViaProtection::IVa => "IVa",
+            IPC4761ViaProtection::IVb => "IVb",
+            IPC4761ViaProtection::V => "V",
+            IPC4761ViaProtection::VI => "VI",
+            IPC4761ViaProtection::VII => "VII",
+            IPC4761ViaProtection::None => "None",
+        };
+        write!(writer, "{}", code)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ComponentOutline {
+    Body,
+    Lead2Lead,
+    Footprint,
+    Courtyard,
+}
+
+impl<W: Write> PartialGerberCode<W> for ComponentOutline {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        let code = match self {
+            ComponentOutline::Body => "Body",
+            ComponentOutline::Lead2Lead => "Lead2Lead",
+            ComponentOutline::Footprint => "Footprint",
+            ComponentOutline::Courtyard => "Courtyard",
+        };
+        write!(writer, "{}", code)?;
+        Ok(())
+    }
+}
 // DrillFunction
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -401,10 +626,32 @@ pub enum SmdPadType {
     SoldermaskDefined,
 }
 
+impl<W: Write> PartialGerberCode<W> for SmdPadType {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            SmdPadType::CopperDefined => write!(writer, "CuDef")?,
+            SmdPadType::SoldermaskDefined => write!(writer, "SMDef")?,
+        };
+        Ok(())
+    }
+}
+
 // FiducialScope
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FiducialScope {
-    Global,
     Local,
+    Global,
+    Panel,
+}
+
+impl<W: Write> PartialGerberCode<W> for FiducialScope {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            FiducialScope::Global => write!(writer, "Global")?,
+            FiducialScope::Local => write!(writer, "Local")?,
+            FiducialScope::Panel => write!(writer, "Panel")?,
+        };
+        Ok(())
+    }
 }

@@ -11,11 +11,12 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### v0.4.0 (2025-06-03) - (unreleased)
+### v0.4.0 (2025-06-10) - (unreleased)
 
 - [added] Support for macro expressions.  See `MacroDecimal`.
 - [added] `MacroBoolean`.
 - [added] `MacroInteger`.
+- [added] Serialization of `ApertureAttribute` (previously it would panic on serializing them).
 - [changed] Replaced `Aperture::Other` with `Aperture::Macro`, the latter having option arguments.
 - [changed] Use `MacroBoolean` instead of `bool` for `exposure` on macro primitives.
 - [changed] `PolygonPrimitive::new` uses a `MacroInteger` for the `vertices` argument.
