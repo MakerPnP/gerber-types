@@ -16,6 +16,7 @@ Possible log types:
 - [added] Support for macro expressions.  See `MacroDecimal`.
 - [added] `MacroBoolean`.
 - [added] `MacroInteger`.
+- [added] `ApertureBlock`.
 - [added] Serialization of `ApertureAttribute` (previously it would panic on serializing them).
 - [added] Serialization of `FileAttribute` (previously it would panic on serializing them).
 - [changed] Replaced `Aperture::Other` with `Aperture::Macro`, the latter having option arguments.

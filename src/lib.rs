@@ -286,6 +286,14 @@ mod serializaion_tests {
     }
 
     #[test]
+    fn test_aperture_block_serialize() {
+        let o = ExtendedCode::ApertureBlock(ApertureBlock::Open { code: 102 });
+        let c = ExtendedCode::ApertureBlock(ApertureBlock::Close);
+        assert_code!(o, "%AB102*%\n");
+        assert_code!(c, "%AB*%\n");
+    }
+
+    #[test]
     fn test_delete_attribute() {
         let d = ExtendedCode::DeleteAttribute("foo".into());
         assert_code!(d, "%TDfoo*%\n");

@@ -265,6 +265,24 @@ impl<W: Write> PartialGerberCode<W> for StepAndRepeat {
     }
 }
 
+// ApertureBlock
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ApertureBlock {
+    Open { code: i32 },
+    Close,
+}
+
+impl<W: Write> PartialGerberCode<W> for ApertureBlock {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match *self {
+            ApertureBlock::Open { code } => write!(writer, "{}", code)?,
+            ApertureBlock::Close => {}
+        };
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

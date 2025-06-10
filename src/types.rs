@@ -76,6 +76,8 @@ pub enum ExtendedCode {
     LoadPolarity(extended_codes::Polarity),
     /// SR
     StepAndRepeat(extended_codes::StepAndRepeat),
+    /// AB
+    ApertureBlock(extended_codes::ApertureBlock),
     /// TF
     FileAttribute(attributes::FileAttribute),
     /// TA
@@ -111,6 +113,11 @@ impl_from!(
     ExtendedCode::StepAndRepeat
 );
 impl_from!(
+    extended_codes::ApertureBlock,
+    ExtendedCode,
+    ExtendedCode::ApertureBlock
+);
+impl_from!(
     attributes::FileAttribute,
     ExtendedCode,
     ExtendedCode::FileAttribute
@@ -127,6 +134,7 @@ impl_command_fromfrom!(extended_codes::ApertureDefinition, ExtendedCode::from);
 impl_command_fromfrom!(macros::ApertureMacro, ExtendedCode::from);
 impl_command_fromfrom!(extended_codes::Polarity, ExtendedCode::from);
 impl_command_fromfrom!(extended_codes::StepAndRepeat, ExtendedCode::from);
+impl_command_fromfrom!(extended_codes::ApertureBlock, ExtendedCode::from);
 impl_command_fromfrom!(attributes::FileAttribute, ExtendedCode::from);
 impl_command_fromfrom!(attributes::ApertureAttribute, ExtendedCode::from);
 
@@ -179,6 +187,20 @@ mod test {
         assert_eq!(c1, c2);
     }
 
+
+    #[test]
+    fn test_extended_code_from_step_and_repeat() {
+        let e1: ExtendedCode = ExtendedCode::StepAndRepeat(StepAndRepeat::Close);
+        let e2: ExtendedCode = StepAndRepeat::Close.into();
+        assert_eq!(e1, e2);
+    }
+
+    #[test]
+    fn test_extended_code_from_aperture_block() {
+        let e1: ExtendedCode = ExtendedCode::ApertureBlock(ApertureBlock::Open { code: 102 });
+        let e2: ExtendedCode = ApertureBlock::Open { code: 102 }.into();
+        assert_eq!(e1, e2);
+    }
     #[test]
     fn test_extended_code_from_polarity() {
         let e1: ExtendedCode = ExtendedCode::LoadPolarity(Polarity::Dark);
