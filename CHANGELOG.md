@@ -17,8 +17,8 @@ Possible log types:
 - [added] `MacroBoolean`.
 - [added] `MacroInteger`.
 - [added] `ApertureBlock`.
-- [added] Serialization of `ApertureAttribute` (previously it would panic on serializing them).
 - [added] Serialization of `FileAttribute` (previously it would panic on serializing them).
+- [added] Serialization of `ApertureAttribute` (previously it would panic on serializing them).
 - [changed] Replaced `Aperture::Other` with `Aperture::Macro`, the latter having option arguments.
 - [changed] Use `MacroBoolean` instead of `bool` for `exposure` on macro primitives.
 - [changed] `PolygonPrimitive::new` uses a `MacroInteger` for the `vertices` argument.
