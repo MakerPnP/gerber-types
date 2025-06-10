@@ -381,7 +381,7 @@ mod serializaion_tests {
         let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
             from_layer: 1,
             to_layer: 2,
-            drill: Drill::Blind,
+            drill: PlatedDrill::Blind,
             label: None,
         }));
         assert_code!(func, "%TF.FileFunction,Plated,1,2,Blind*%\n");
@@ -389,7 +389,7 @@ mod serializaion_tests {
         let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
             from_layer: 1,
             to_layer: 4,
-            drill: Drill::ThroughHole,
+            drill: PlatedDrill::PlatedThroughHole,
             label: None,
         }));
         assert_code!(func, "%TF.FileFunction,Plated,1,4,PTH*%\n");
@@ -397,7 +397,7 @@ mod serializaion_tests {
         let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
             from_layer: 2,
             to_layer: 3,
-            drill: Drill::Buried,
+            drill: PlatedDrill::Buried,
             label: None,
         }));
         assert_code!(func, "%TF.FileFunction,Plated,2,3,Buried*%\n");
@@ -405,7 +405,7 @@ mod serializaion_tests {
         let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
             from_layer: 1,
             to_layer: 2,
-            drill: Drill::ThroughHole,
+            drill: PlatedDrill::PlatedThroughHole,
             label: Some(DrillRouteType::Drill),
         }));
         assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Drill*%\n");
@@ -413,7 +413,7 @@ mod serializaion_tests {
         let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
             from_layer: 1,
             to_layer: 2,
-            drill: Drill::ThroughHole,
+            drill: PlatedDrill::PlatedThroughHole,
             label: Some(DrillRouteType::Mixed),
         }));
         assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Mixed*%\n");
@@ -421,7 +421,7 @@ mod serializaion_tests {
         let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
             from_layer: 1,
             to_layer: 2,
-            drill: Drill::ThroughHole,
+            drill: PlatedDrill::PlatedThroughHole,
             label: Some(DrillRouteType::Route),
         }));
         assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Rout*%\n");
@@ -433,7 +433,7 @@ mod serializaion_tests {
             ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
                 from_layer: 1,
                 to_layer: 2,
-                drill: Drill::Blind,
+                drill: NonPlatedDrill::Blind,
                 label: None,
             }));
         assert_code!(func, "%TF.FileFunction,NonPlated,1,2,Blind*%\n");
@@ -442,16 +442,16 @@ mod serializaion_tests {
             ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
                 from_layer: 1,
                 to_layer: 4,
-                drill: Drill::ThroughHole,
+                drill: NonPlatedDrill::NonPlatedThroughHole,
                 label: None,
             }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,4,PTH*%\n");
+        assert_code!(func, "%TF.FileFunction,NonPlated,1,4,NPTH*%\n");
 
         let func =
             ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
                 from_layer: 2,
                 to_layer: 3,
-                drill: Drill::Buried,
+                drill: NonPlatedDrill::Buried,
                 label: None,
             }));
         assert_code!(func, "%TF.FileFunction,NonPlated,2,3,Buried*%\n");
@@ -460,28 +460,28 @@ mod serializaion_tests {
             ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
                 from_layer: 1,
                 to_layer: 2,
-                drill: Drill::ThroughHole,
+                drill: NonPlatedDrill::NonPlatedThroughHole,
                 label: Some(DrillRouteType::Drill),
             }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,PTH,Drill*%\n");
+        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Drill*%\n");
 
         let func =
             ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
                 from_layer: 1,
                 to_layer: 2,
-                drill: Drill::ThroughHole,
+                drill: NonPlatedDrill::NonPlatedThroughHole,
                 label: Some(DrillRouteType::Mixed),
             }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,PTH,Mixed*%\n");
+        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Mixed*%\n");
 
         let func =
             ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
                 from_layer: 1,
                 to_layer: 2,
-                drill: Drill::ThroughHole,
+                drill: NonPlatedDrill::NonPlatedThroughHole,
                 label: Some(DrillRouteType::Route),
             }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,PTH,Rout*%\n");
+        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Rout*%\n");
     }
 
     #[test]

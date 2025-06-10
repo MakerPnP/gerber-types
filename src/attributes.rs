@@ -509,21 +509,41 @@ impl<W: Write> PartialGerberCode<W> for CopperType {
     }
 }
 
-// Drill
+// PlatedDrill
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Drill {
-    ThroughHole,
+pub enum PlatedDrill {
+    PlatedThroughHole,
     Blind,
     Buried,
 }
 
-impl<W: Write> PartialGerberCode<W> for Drill {
+impl<W: Write> PartialGerberCode<W> for PlatedDrill {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
-            Drill::ThroughHole => write!(writer, "PTH")?,
-            Drill::Blind => write!(writer, "Blind")?,
-            Drill::Buried => write!(writer, "Buried")?,
+            PlatedDrill::PlatedThroughHole => write!(writer, "PTH")?,
+            PlatedDrill::Blind => write!(writer, "Blind")?,
+            PlatedDrill::Buried => write!(writer, "Buried")?,
+        }
+        Ok(())
+    }
+}
+
+// NonPlatedDrill
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum NonPlatedDrill {
+    NonPlatedThroughHole,
+    Blind,
+    Buried,
+}
+
+impl<W: Write> PartialGerberCode<W> for NonPlatedDrill {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            NonPlatedDrill::NonPlatedThroughHole => write!(writer, "NPTH")?,
+            NonPlatedDrill::Blind => write!(writer, "Blind")?,
+            NonPlatedDrill::Buried => write!(writer, "Buried")?,
         }
         Ok(())
     }
@@ -582,13 +602,13 @@ pub enum FileFunction {
     Plated {
         from_layer: i32,
         to_layer: i32,
-        drill: Drill,
+        drill: PlatedDrill,
         label: Option<DrillRouteType>,
     },
     NonPlated {
         from_layer: i32,
         to_layer: i32,
-        drill: Drill,
+        drill: NonPlatedDrill,
         label: Option<DrillRouteType>,
     },
     /// Apparently, this should be used instead of `KeepOut` since 2017.11, see "11.15 Revision 2017.11" but this makes no sense
