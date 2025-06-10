@@ -74,8 +74,16 @@ pub enum ExtendedCode {
     ApertureMacro(macros::ApertureMacro),
     /// LP
     LoadPolarity(extended_codes::Polarity),
+    /// LM
+    LoadMirroring(extended_codes::Mirroring),
+    /// LR
+    LoadRotation(extended_codes::Rotation),
+    /// LS
+    LoadScaling(extended_codes::Scaling),
     /// SR
     StepAndRepeat(extended_codes::StepAndRepeat),
+    /// AB
+    ApertureBlock(extended_codes::ApertureBlock),
     /// TF
     FileAttribute(attributes::FileAttribute),
     /// TA
@@ -106,9 +114,29 @@ impl_from!(
     ExtendedCode::LoadPolarity
 );
 impl_from!(
+    extended_codes::Mirroring,
+    ExtendedCode,
+    ExtendedCode::LoadMirroring
+);
+impl_from!(
+    extended_codes::Rotation,
+    ExtendedCode,
+    ExtendedCode::LoadRotation
+);
+impl_from!(
+    extended_codes::Scaling,
+    ExtendedCode,
+    ExtendedCode::LoadScaling
+);
+impl_from!(
     extended_codes::StepAndRepeat,
     ExtendedCode,
     ExtendedCode::StepAndRepeat
+);
+impl_from!(
+    extended_codes::ApertureBlock,
+    ExtendedCode,
+    ExtendedCode::ApertureBlock
 );
 impl_from!(
     attributes::FileAttribute,
@@ -126,7 +154,11 @@ impl_command_fromfrom!(extended_codes::Unit, ExtendedCode::from);
 impl_command_fromfrom!(extended_codes::ApertureDefinition, ExtendedCode::from);
 impl_command_fromfrom!(macros::ApertureMacro, ExtendedCode::from);
 impl_command_fromfrom!(extended_codes::Polarity, ExtendedCode::from);
+impl_command_fromfrom!(extended_codes::Scaling, ExtendedCode::from);
+impl_command_fromfrom!(extended_codes::Mirroring, ExtendedCode::from);
+impl_command_fromfrom!(extended_codes::Rotation, ExtendedCode::from);
 impl_command_fromfrom!(extended_codes::StepAndRepeat, ExtendedCode::from);
+impl_command_fromfrom!(extended_codes::ApertureBlock, ExtendedCode::from);
 impl_command_fromfrom!(attributes::FileAttribute, ExtendedCode::from);
 impl_command_fromfrom!(attributes::ApertureAttribute, ExtendedCode::from);
 
@@ -139,6 +171,7 @@ mod test {
     use crate::extended_codes::Polarity;
     use crate::function_codes::GCode;
     use crate::traits::GerberCode;
+    use crate::{ApertureBlock, Mirroring, Rotation, Scaling, StepAndRepeat};
 
     #[test]
     fn test_debug() {
@@ -180,9 +213,43 @@ mod test {
     }
 
     #[test]
+    fn test_extended_code_from_step_and_repeat() {
+        let e1: ExtendedCode = ExtendedCode::StepAndRepeat(StepAndRepeat::Close);
+        let e2: ExtendedCode = StepAndRepeat::Close.into();
+        assert_eq!(e1, e2);
+    }
+
+    #[test]
+    fn test_extended_code_from_aperture_block() {
+        let e1: ExtendedCode = ExtendedCode::ApertureBlock(ApertureBlock::Open { code: 102 });
+        let e2: ExtendedCode = ApertureBlock::Open { code: 102 }.into();
+        assert_eq!(e1, e2);
+    }
+    #[test]
     fn test_extended_code_from_polarity() {
         let e1: ExtendedCode = ExtendedCode::LoadPolarity(Polarity::Dark);
         let e2: ExtendedCode = Polarity::Dark.into();
+        assert_eq!(e1, e2);
+    }
+
+    #[test]
+    fn test_extended_code_from_mirroring() {
+        let e1: ExtendedCode = ExtendedCode::LoadMirroring(Mirroring::XY);
+        let e2: ExtendedCode = Mirroring::XY.into();
+        assert_eq!(e1, e2);
+    }
+
+    #[test]
+    fn test_extended_code_from_scaling() {
+        let e1: ExtendedCode = ExtendedCode::LoadScaling(Scaling { scale: 50.0 });
+        let e2: ExtendedCode = Scaling { scale: 50.0 }.into();
+        assert_eq!(e1, e2);
+    }
+
+    #[test]
+    fn test_extended_code_from_rotation() {
+        let e1: ExtendedCode = ExtendedCode::LoadRotation(Rotation { rotation: 90.0 });
+        let e2: ExtendedCode = Rotation { rotation: 90.0 }.into();
         assert_eq!(e1, e2);
     }
 }

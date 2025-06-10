@@ -237,6 +237,57 @@ impl<W: Write> PartialGerberCode<W> for Polarity {
     }
 }
 
+// Mirroring
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Mirroring {
+    None,
+    X,
+    Y,
+    XY,
+}
+
+impl<W: Write> PartialGerberCode<W> for Mirroring {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match *self {
+            Mirroring::None => write!(writer, "N")?,
+            Mirroring::X => write!(writer, "X")?,
+            Mirroring::Y => write!(writer, "Y")?,
+            Mirroring::XY => write!(writer, "XY")?,
+        };
+        Ok(())
+    }
+}
+
+// Scaling
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Scaling {
+    pub scale: f64,
+}
+
+impl<W: Write> PartialGerberCode<W> for Scaling {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(writer, "{}", self.scale)?;
+        Ok(())
+    }
+}
+
+// Rotation
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Rotation {
+    /// in degrees, counter-clockwise
+    pub rotation: f64,
+}
+
+impl<W: Write> PartialGerberCode<W> for Rotation {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(writer, "{}", self.rotation)?;
+        Ok(())
+    }
+}
+
 // StepAndRepeat
 
 #[derive(Debug, Clone, PartialEq)]
@@ -260,6 +311,24 @@ impl<W: Write> PartialGerberCode<W> for StepAndRepeat {
                 distance_y: dy,
             } => write!(writer, "X{}Y{}I{}J{}", rx, ry, dx, dy)?,
             StepAndRepeat::Close => {}
+        };
+        Ok(())
+    }
+}
+
+// ApertureBlock
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ApertureBlock {
+    Open { code: i32 },
+    Close,
+}
+
+impl<W: Write> PartialGerberCode<W> for ApertureBlock {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match *self {
+            ApertureBlock::Open { code } => write!(writer, "{}", code)?,
+            ApertureBlock::Close => {}
         };
         Ok(())
     }
