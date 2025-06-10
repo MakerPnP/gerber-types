@@ -248,12 +248,58 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
     }
 }
 
+// TextMode
+#[derive(Debug, Clone, PartialEq)]
+pub enum TextMode {
+    BarCode,
+    Characters,
+}
+
+impl<W: Write> PartialGerberCode<W> for TextMode {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            Self::Characters => write!(writer, "C")?,
+            Self::BarCode => write!(writer, "B")?,
+        }
+        Ok(())
+    }
+}
+
+// TextMirroring
+#[derive(Debug, Clone, PartialEq)]
+pub enum TextMirroring {
+    Readable,
+    Mirrored,
+}
+
+impl<W: Write> PartialGerberCode<W> for TextMirroring {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            Self::Readable => write!(writer, "R")?,
+            Self::Mirrored => write!(writer, "M")?,
+        }
+        Ok(())
+    }
+}
+
 // ApertureAttribute
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ApertureAttribute {
     ApertureFunction(ApertureFunction),
+    DrillTolerance {
+        plus: f64,
+        minus: f64,
+    },
     CustomAttribute(String, Option<String>),
+    FlashText {
+        text: String,
+        mode: TextMode,
+        mirroring: Option<TextMirroring>,
+        font: Option<String>,
+        size: Option<i32>,
+        comment: Option<String>,
+    },
 }
 
 impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
@@ -407,6 +453,34 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                     ApertureFunction::Drawing => {
                         write!(writer, "Drawing")?;
                     }
+                }
+            }
+            ApertureAttribute::DrillTolerance { plus, minus } => {
+                write!(writer, ".DrillTolerance,{},{}", plus, minus)?;
+            }
+            ApertureAttribute::FlashText {
+                text,
+                mode,
+                mirroring,
+                font,
+                size,
+                comment,
+            } => {
+                write!(writer, ".FlashText,{},", text)?;
+                mode.serialize_partial(writer)?;
+                write!(writer, ",")?;
+                mirroring.serialize_partial(writer)?;
+                write!(writer, ",")?;
+                if let Some(font) = font {
+                    write!(writer, "{}", font)?;
+                }
+                write!(writer, ",")?;
+                if let Some(size) = size {
+                    write!(writer, "{}", size)?;
+                }
+                write!(writer, ",")?;
+                if let Some(comment) = comment {
+                    write!(writer, "{}", comment)?;
                 }
             }
             ApertureAttribute::CustomAttribute(name, value) => {

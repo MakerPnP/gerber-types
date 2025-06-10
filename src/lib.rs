@@ -1098,6 +1098,42 @@ mod serializaion_tests {
     }
 
     #[test]
+    fn test_drill_tolerance_attribute_serialize() {
+        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::DrillTolerance {
+            plus: 1.0,
+            minus: 2.0,
+        });
+        assert_code!(function, "%TA.DrillTolerance,1,2*%\n");
+    }
+
+    #[test]
+    fn test_flash_text_attribute_serialize() {
+        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
+            text: "Test".to_string(),
+            mode: TextMode::Characters,
+            mirroring: Some(TextMirroring::Readable),
+            font: Some("Font Name".to_string()),
+            size: Some(10),
+            comment: Some("A Comment".to_string()),
+        });
+        assert_code!(
+            function,
+            "%TA.FlashText,Test,C,R,Font Name,10,A Comment*%\n"
+        );
+
+        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
+            text: "Test".to_string(),
+            mode: TextMode::BarCode,
+            mirroring: Some(TextMirroring::Mirrored),
+            font: None,
+            size: None,
+            comment: None,
+        });
+        // 2024.05 - 5.6.12 .FlashText - "An empty field means that the corresponding meta-data is not specified."
+        assert_code!(function, "%TA.FlashText,Test,B,M,,,*%\n");
+    }
+
+    #[test]
     fn test_aperture_attribute_serialize() {
         // Test with Profile (found in "All data layers" section of the enum)
         let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
