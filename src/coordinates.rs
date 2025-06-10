@@ -2,7 +2,6 @@
 
 use std::convert::TryFrom;
 use std::convert::{From, Into};
-use std::i64;
 use std::io::Write;
 use std::num::FpCategory;
 
@@ -96,9 +95,9 @@ impl TryFrom<f64> for CoordinateNumber {
     }
 }
 
-impl Into<f64> for CoordinateNumber {
-    fn into(self) -> f64 {
-        (self.nano as f64) / DECIMAL_PLACES_FACTOR as f64
+impl From<CoordinateNumber> for f64 {
+    fn from(value: CoordinateNumber) -> Self {
+        (value.nano as f64) / DECIMAL_PLACES_FACTOR as f64
     }
 }
 

@@ -1,12 +1,32 @@
 //! Attributes.
 
+use chrono::{DateTime, FixedOffset};
 use std::io::Write;
-
-use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::errors::GerberResult;
 use crate::traits::PartialGerberCode;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Ident {
+    Guid(Uuid),
+    Name(String),
+}
+
+impl<W: Write> PartialGerberCode<W> for Ident {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            Ident::Guid(guid) => {
+                write!(writer, "{}", guid)?;
+            }
+            Ident::Name(value) => {
+                write!(writer, "{}", value)?;
+            }
+        }
+
+        Ok(())
+    }
+}
 
 // FileAttribute
 
@@ -15,8 +35,9 @@ pub enum FileAttribute {
     Part(Part),
     FileFunction(FileFunction),
     FilePolarity(FilePolarity),
+    SameCoordinates(Ident),
+    CreationDate(DateTime<FixedOffset>),
     GenerationSoftware(GenerationSoftware),
-    CreationDate(DateTime<Utc>),
     ProjectId {
         id: String,
         guid: Uuid,
@@ -25,13 +46,13 @@ pub enum FileAttribute {
     Md5(String),
     UserDefined {
         name: String,
-        value: Vec<String>,
+        values: Vec<String>,
     },
 }
 
 impl<W: Write> PartialGerberCode<W> for FileAttribute {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
+        match self {
             FileAttribute::Part(ref part) => {
                 write!(writer, "Part,")?;
                 part.serialize_partial(writer)?;
@@ -51,11 +72,41 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                             t.serialize_partial(writer)?;
                         }
                     }
+                    FileFunction::Plated {
+                        from_layer,
+                        to_layer,
+                        drill,
+                        label,
+                    } => {
+                        write!(writer, "Plated,{},{},", from_layer, to_layer)?;
+                        drill.serialize_partial(writer)?;
+                        if let Some(ref l) = label {
+                            write!(writer, ",")?;
+                            l.serialize_partial(writer)?;
+                        }
+                    }
+                    FileFunction::NonPlated {
+                        from_layer,
+                        to_layer,
+                        drill,
+                        label,
+                    } => {
+                        write!(writer, "NonPlated,{},{},", from_layer, to_layer)?;
+                        drill.serialize_partial(writer)?;
+                        if let Some(ref l) = label {
+                            write!(writer, ",")?;
+                            l.serialize_partial(writer)?;
+                        }
+                    }
                     FileFunction::Profile(ref plating) => {
                         write!(writer, "Profile,")?;
                         plating.serialize_partial(writer)?;
                     }
-                    FileFunction::Soldermask { ref pos, ref index } => {
+                    FileFunction::KeepOut(ref pos) => {
+                        write!(writer, "Keepout,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::SolderMask { ref pos, ref index } => {
                         write!(writer, "Soldermask,")?;
                         pos.serialize_partial(writer)?;
                         if let Some(ref i) = index {
@@ -69,19 +120,129 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                             write!(writer, ",{}", *i)?;
                         }
                     }
-                    _ => unimplemented!(),
+                    FileFunction::Component { layer, pos } => {
+                        write!(writer, "Component,L{},", layer)?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::Paste(pos) => {
+                        write!(writer, "Paste,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::Glue(pos) => {
+                        write!(writer, "Glue,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::CarbonMask { pos, index } => {
+                        write!(writer, "Carbonmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::GoldMask { pos, index } => {
+                        write!(writer, "Goldmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::HeatsinkMask { pos, index } => {
+                        write!(writer, "Heatsinkmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::PeelableMask { pos, index } => {
+                        write!(writer, "Peelablemask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::SilverMask { pos, index } => {
+                        write!(writer, "Silvermask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::TinMask { pos, index } => {
+                        write!(writer, "Tinmask,")?;
+                        pos.serialize_partial(writer)?;
+                        if let Some(ref i) = index {
+                            write!(writer, ",{}", *i)?;
+                        }
+                    }
+                    FileFunction::DepthRoute(pos) => {
+                        write!(writer, "Depthrout,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::VCut(pos) => {
+                        write!(writer, "Vcut")?;
+                        if let Some(pos) = pos {
+                            write!(writer, ",")?;
+                            pos.serialize_partial(writer)?;
+                        }
+                    }
+                    FileFunction::ViaFill => {
+                        write!(writer, "Viafill")?;
+                    }
+                    FileFunction::Pads(pos) => {
+                        write!(writer, "Pads,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::Other(value) => {
+                        write!(writer, "Other,{}", value)?;
+                    }
+
+                    // "Drawing layers"
+                    FileFunction::DrillMap => {
+                        write!(writer, "Drillmap")?;
+                    }
+                    FileFunction::FabricationDrawing => {
+                        write!(writer, "FabricationDrawing")?;
+                    }
+                    FileFunction::VCutMap => {
+                        write!(writer, "Vcutmap")?;
+                    }
+                    FileFunction::AssemblyDrawing(pos) => {
+                        write!(writer, "AssemblyDrawing,")?;
+                        pos.serialize_partial(writer)?;
+                    }
+                    FileFunction::ArrayDrawing => {
+                        write!(writer, "ArrayDrawing")?;
+                    }
+                    FileFunction::OtherDrawing(value) => {
+                        write!(writer, "OtherDrawing,{}", value)?;
+                    }
                 }
-            }
-            FileAttribute::GenerationSoftware(ref gs) => {
-                write!(writer, "GenerationSoftware,")?;
-                gs.serialize_partial(writer)?;
             }
             FileAttribute::FilePolarity(ref p) => {
                 write!(writer, "FilePolarity,")?;
                 p.serialize_partial(writer)?;
             }
+            FileAttribute::SameCoordinates(ident) => {
+                write!(writer, "SameCoordinates")?;
+                ident.serialize_partial(writer)?;
+            }
+            FileAttribute::CreationDate(date) => {
+                write!(writer, "CreationDate,{}", date.to_rfc3339())?;
+            }
+            FileAttribute::GenerationSoftware(ref gs) => {
+                write!(writer, "GenerationSoftware,")?;
+                gs.serialize_partial(writer)?;
+            }
+            FileAttribute::ProjectId { id, guid, revision } => {
+                write!(writer, "ProjectId,{},{},{}", id, guid, revision)?;
+            }
             FileAttribute::Md5(ref hash) => write!(writer, "MD5,{}", hash)?,
-            _ => unimplemented!(),
+            FileAttribute::UserDefined { name, values } => {
+                write!(writer, "{}", name)?;
+                for value in values {
+                    write!(writer, ",{}", value)?;
+                }
+            }
         };
         Ok(())
     }
@@ -92,7 +253,171 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ApertureAttribute {
     ApertureFunction(ApertureFunction),
-    DrillTolerance { plus: f64, minus: f64 },
+    CustomAttribute(String, Option<String>),
+}
+
+impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            ApertureAttribute::ApertureFunction(ref af) => {
+                write!(writer, ".AperFunction,")?;
+                match af {
+                    // "Drill and rout layers"
+                    ApertureFunction::ViaDrill(ref value) => {
+                        write!(writer, "ViaDrill")?;
+                        if let Some(value) = value {
+                            write!(writer, ",")?;
+                            value.serialize_partial(writer)?;
+                        }
+                    }
+                    ApertureFunction::BackDrill => {
+                        write!(writer, "BackDrill")?;
+                    }
+                    ApertureFunction::ComponentDrill { press_fit } => {
+                        write!(writer, "ComponentDrill")?;
+                        if matches!(press_fit, Some(true)) {
+                            write!(writer, ",PressFit")?;
+                        }
+                    }
+                    ApertureFunction::MechanicalDrill { function } => {
+                        write!(writer, "MechanicalDrill")?;
+                        if let Some(ref function) = function {
+                            write!(writer, ",")?;
+                            match function {
+                                DrillFunction::Tooling => {
+                                    write!(writer, "Tooling")?;
+                                }
+                                DrillFunction::BreakOut => {
+                                    write!(writer, "BreakOut")?;
+                                }
+                                DrillFunction::Other => {
+                                    write!(writer, "Other")?;
+                                }
+                            }
+                        }
+                    }
+                    ApertureFunction::CastellatedDrill => {
+                        write!(writer, "CastellatedDrill")?;
+                    }
+                    ApertureFunction::OtherDrill(ref value) => {
+                        write!(writer, "OtherDrill,{}", value)?;
+                    }
+
+                    // "Copper layers"
+                    ApertureFunction::ComponentPad => {
+                        write!(writer, "ComponentPad")?;
+                    }
+                    ApertureFunction::SmdPad(ref value) => {
+                        write!(writer, "SMDPad,")?;
+                        value.serialize_partial(writer)?;
+                    }
+                    ApertureFunction::BgaPad(ref value) => {
+                        write!(writer, "BGAPad,")?;
+                        value.serialize_partial(writer)?;
+                    }
+                    ApertureFunction::ConnectorPad => {
+                        write!(writer, "ConnectorPad")?;
+                    }
+                    ApertureFunction::HeatsinkPad => {
+                        write!(writer, "HeatsinkPad")?;
+                    }
+                    ApertureFunction::ViaPad => {
+                        write!(writer, "ViaPad")?;
+                    }
+                    ApertureFunction::TestPad => {
+                        write!(writer, "TestPad")?;
+                    }
+                    ApertureFunction::CastellatedPad => {
+                        write!(writer, "CastellatedPad")?;
+                    }
+                    ApertureFunction::FiducialPad(ref value) => {
+                        write!(writer, "FiducialPad,")?;
+                        value.serialize_partial(writer)?;
+                    }
+                    ApertureFunction::ThermalReliefPad => {
+                        write!(writer, "ThermalReliefPad")?;
+                    }
+                    ApertureFunction::WasherPad => {
+                        write!(writer, "WasherPad")?;
+                    }
+                    ApertureFunction::AntiPad => {
+                        write!(writer, "AntiPad")?;
+                    }
+                    ApertureFunction::OtherPad(ref value) => {
+                        write!(writer, "OtherPad,{}", value)?;
+                    }
+                    ApertureFunction::Conductor => {
+                        write!(writer, "Conductor")?;
+                    }
+                    ApertureFunction::EtchedComponent => {
+                        write!(writer, "EtchedComponent")?;
+                    }
+                    ApertureFunction::NonConductor => {
+                        write!(writer, "NonConductor")?;
+                    }
+                    ApertureFunction::CopperBalancing => {
+                        write!(writer, "CopperBalancing")?;
+                    }
+                    ApertureFunction::Border => {
+                        write!(writer, "Border")?;
+                    }
+                    ApertureFunction::OtherCopper(ref value) => {
+                        write!(writer, "OtherCopper,{}", value)?;
+                    }
+
+                    // "Component layers"
+                    ApertureFunction::ComponentMain => {
+                        write!(writer, "ComponentMain")?;
+                    }
+                    ApertureFunction::ComponentOutline(ref value) => {
+                        write!(writer, "ComponentOutline")?;
+                        if let Some(value) = value {
+                            write!(writer, ",")?;
+                            value.serialize_partial(writer)?;
+                        }
+                    }
+                    ApertureFunction::ComponentPin => {
+                        write!(writer, "ComponentPin")?;
+                    }
+
+                    // "All data layers"
+                    ApertureFunction::Profile => {
+                        write!(writer, "Profile")?;
+                    }
+                    ApertureFunction::NonMaterial => {
+                        write!(writer, "NonMaterial")?;
+                    }
+                    ApertureFunction::Material => {
+                        write!(writer, "Material")?;
+                    }
+                    ApertureFunction::Other(value) => {
+                        write!(writer, "Other,{}", value)?;
+                    }
+
+                    // 2024.05 - 8.4 - "Deprecated attribute values"
+                    ApertureFunction::Slot => {
+                        write!(writer, "Slot")?;
+                    }
+                    ApertureFunction::Cavity => {
+                        write!(writer, "Cavity")?;
+                    }
+                    ApertureFunction::CutOut => {
+                        write!(writer, "CutOut")?;
+                    }
+                    ApertureFunction::Drawing => {
+                        write!(writer, "Drawing")?;
+                    }
+                }
+            }
+            ApertureAttribute::CustomAttribute(name, value) => {
+                write!(writer, "{}", name)?;
+                if let Some(value) = value {
+                    write!(writer, ",{}", value)?;
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 // Part
@@ -193,6 +518,17 @@ pub enum Drill {
     Buried,
 }
 
+impl<W: Write> PartialGerberCode<W> for Drill {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            Drill::ThroughHole => write!(writer, "PTH")?,
+            Drill::Blind => write!(writer, "Blind")?,
+            Drill::Buried => write!(writer, "Buried")?,
+        }
+        Ok(())
+    }
+}
+
 // DrillRouteType
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -200,6 +536,17 @@ pub enum DrillRouteType {
     Drill,
     Route,
     Mixed,
+}
+
+impl<W: Write> PartialGerberCode<W> for DrillRouteType {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            DrillRouteType::Drill => write!(writer, "Drill")?,
+            DrillRouteType::Route => write!(writer, "Rout")?,
+            DrillRouteType::Mixed => write!(writer, "Mixed")?,
+        }
+        Ok(())
+    }
 }
 
 // Profile
@@ -224,50 +571,14 @@ impl<W: Write> PartialGerberCode<W> for Profile {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FileFunction {
+    //
+    // "Data layers"
+    //
     Copper {
         layer: i32,
         pos: ExtendedPosition,
         copper_type: Option<CopperType>,
     },
-    Soldermask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Legend {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Goldmask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Silvermask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Tinmask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Carbonmask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Peelablesoldermask {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Glue {
-        pos: Position,
-        index: Option<i32>,
-    },
-    Viatenting(Position),
-    Viafill,
-    Heatsink(Position),
-    Paste(Position),
-    KeepOut(Position),
-    Pads(Position),
-    Scoring(Position),
     Plated {
         from_layer: i32,
         to_layer: i32,
@@ -280,13 +591,62 @@ pub enum FileFunction {
         drill: Drill,
         label: Option<DrillRouteType>,
     },
+    /// Apparently, this should be used instead of `KeepOut` since 2017.11, see "11.15 Revision 2017.11" but this makes no sense
+    /// Since keep-out has a `Position` but Profile does not...
     Profile(Profile),
-    Drillmap,
-    FabricationDrawing,
-    ArrayDrawing,
-    AssemblyDrawing(Position),
-    Drawing(String),
+    KeepOut(Position),
+    SolderMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    Legend {
+        pos: Position,
+        index: Option<i32>,
+    },
+    Component {
+        layer: i32,
+        pos: Position,
+    },
+    Paste(Position),
+    Glue(Position),
+    CarbonMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    GoldMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    HeatsinkMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    PeelableMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    SilverMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    TinMask {
+        pos: Position,
+        index: Option<i32>,
+    },
+    DepthRoute(Position),
+    VCut(Option<Position>),
+    /// Contains the via’s that must be filled (usually with some form of epoxy)
+    ViaFill,
+    Pads(Position),
     Other(String),
+
+    // "Drawing layers"
+    DrillMap,
+    FabricationDrawing,
+    VCutMap,
+    AssemblyDrawing(Position),
+    ArrayDrawing,
+    OtherDrawing(String),
 }
 
 // FilePolarity
@@ -336,29 +696,21 @@ impl<W: Write> PartialGerberCode<W> for GenerationSoftware {
     }
 }
 
-// ApertureFunction
-
+/// ApertureFunction
+///
+/// 2024.05 - 5.6.10 ".AperFunction"
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ApertureFunction {
-    // Only valid for layers with file function plated or non-plated
-    ViaDrill,
+    // "Drill and rout layers"
+    ViaDrill(Option<IPC4761ViaProtection>),
     BackDrill,
-    ComponentDrill {
-        press_fit: Option<bool>, // TODO is this bool?
-    },
+    ComponentDrill { press_fit: Option<bool> },
+    MechanicalDrill { function: Option<DrillFunction> },
     CastellatedDrill,
-    MechanicalDrill {
-        function: Option<DrillFunction>,
-    },
-    Slot,
-    CutOut,
-    Cavity,
     OtherDrill(String),
 
-    // Only valid for layers with file function copper
-    ComponentPad {
-        press_fit: Option<bool>, // TODO is this bool?
-    },
+    // "Copper layers"
+    ComponentPad,
     SmdPad(SmdPadType),
     BgaPad(SmdPadType),
     ConnectorPad,
@@ -372,18 +724,87 @@ pub enum ApertureFunction {
     AntiPad,
     OtherPad(String),
     Conductor,
+    EtchedComponent,
     NonConductor,
     CopperBalancing,
     Border,
     OtherCopper(String),
 
-    // All layers
+    // "All data layers"
     Profile,
-    NonMaterial,
     Material,
+    NonMaterial,
     Other(String),
+
+    // "Component layers"
+    ComponentMain,
+    ComponentOutline(Option<ComponentOutline>),
+    ComponentPin,
+
+    // 2024.05 - 8.4 - "Deprecated attribute values"
+    Slot,
+    CutOut,
+    Cavity,
+    Drawing,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IPC4761ViaProtection {
+    Ia,
+    Ib,
+    IIa,
+    IIb,
+    IIIa,
+    IIIb,
+    IVa,
+    IVb,
+    V,
+    VI,
+    VII,
+    None,
+}
+
+impl<W: Write> PartialGerberCode<W> for IPC4761ViaProtection {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        let code = match self {
+            IPC4761ViaProtection::Ia => "Ia",
+            IPC4761ViaProtection::Ib => "Ib",
+            IPC4761ViaProtection::IIa => "IIa",
+            IPC4761ViaProtection::IIb => "IIb",
+            IPC4761ViaProtection::IIIa => "IIIa",
+            IPC4761ViaProtection::IIIb => "IIIb",
+            IPC4761ViaProtection::IVa => "IVa",
+            IPC4761ViaProtection::IVb => "IVb",
+            IPC4761ViaProtection::V => "V",
+            IPC4761ViaProtection::VI => "VI",
+            IPC4761ViaProtection::VII => "VII",
+            IPC4761ViaProtection::None => "None",
+        };
+        write!(writer, "{}", code)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ComponentOutline {
+    Body,
+    Lead2Lead,
+    Footprint,
+    Courtyard,
+}
+
+impl<W: Write> PartialGerberCode<W> for ComponentOutline {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        let code = match self {
+            ComponentOutline::Body => "Body",
+            ComponentOutline::Lead2Lead => "Lead2Lead",
+            ComponentOutline::Footprint => "Footprint",
+            ComponentOutline::Courtyard => "Courtyard",
+        };
+        write!(writer, "{}", code)?;
+        Ok(())
+    }
+}
 // DrillFunction
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -401,10 +822,32 @@ pub enum SmdPadType {
     SoldermaskDefined,
 }
 
+impl<W: Write> PartialGerberCode<W> for SmdPadType {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            SmdPadType::CopperDefined => write!(writer, "CuDef")?,
+            SmdPadType::SoldermaskDefined => write!(writer, "SMDef")?,
+        };
+        Ok(())
+    }
+}
+
 // FiducialScope
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FiducialScope {
-    Global,
     Local,
+    Global,
+    Panel,
+}
+
+impl<W: Write> PartialGerberCode<W> for FiducialScope {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            FiducialScope::Global => write!(writer, "Global")?,
+            FiducialScope::Local => write!(writer, "Local")?,
+            FiducialScope::Panel => write!(writer, "Panel")?,
+        };
+        Ok(())
+    }
 }

@@ -538,7 +538,7 @@ impl<W: Write> PartialGerberCode<W> for OutlinePrimitive {
         self.exposure.serialize_partial(writer)?;
         writeln!(writer, ",{},", self.points.len() - 1)?;
 
-        for &(ref x, ref y) in &self.points {
+        for (ref x, ref y) in &self.points {
             x.serialize_partial(writer)?;
             write!(writer, ",")?;
             y.serialize_partial(writer)?;
