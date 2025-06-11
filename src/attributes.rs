@@ -1,11 +1,11 @@
 //! Attributes.
 
-use chrono::{DateTime, FixedOffset};
 use std::io::Write;
 use uuid::Uuid;
 
 use crate::errors::GerberResult;
 use crate::traits::PartialGerberCode;
+use crate::GerberDate;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Ident {
@@ -42,7 +42,7 @@ pub enum FileAttribute {
     /// "%TF.SameCoordinates[,<ident>]*%"
     SameCoordinates(Option<Ident>),
     /// "%TF.CreationDate,2015-02-23T15:59:51+01:00*%" ISO8601 + TZ
-    CreationDate(DateTime<FixedOffset>),
+    CreationDate(GerberDate),
     /// "%TF.GenerationSoftware,<vendor>,<application>,<version>*%"
     GenerationSoftware(GenerationSoftware),
     /// "%TF.ProjectId,<Name>,<GUID>,<Revision>*%"

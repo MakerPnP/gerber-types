@@ -4,13 +4,13 @@
 //! to render themselves. This means for example that each `Coordinates`
 //! instance contains a reference to the coordinate format to be used.
 
-use std::convert::From;
-
 use crate::attributes;
 use crate::coordinates;
 use crate::extended_codes;
 use crate::function_codes;
 use crate::macros;
+use chrono::{DateTime, FixedOffset};
+use std::convert::From;
 
 // Helper macros
 
@@ -255,3 +255,6 @@ mod test {
         assert_eq!(e1, e2);
     }
 }
+
+// Date/Time
+pub type GerberDate = DateTime<FixedOffset>;

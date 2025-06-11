@@ -42,14 +42,12 @@ pub use crate::traits::GerberCode;
 pub use crate::types::*;
 
 // re-export some types
-pub use chrono::DateTime;
 pub use uuid::Uuid;
 
 #[cfg(test)]
 mod serialization_tests {
     use super::traits::PartialGerberCode;
     use super::*;
-    use chrono::DateTime;
     use std::io::BufWriter;
     use uuid::Uuid;
 
@@ -331,7 +329,7 @@ mod serialization_tests {
 
         #[test]
         fn test_creation_date() {
-            let date = DateTime::parse_from_rfc3339("2025-06-10T16:25:00+02:00").unwrap();
+            let date = GerberDate::parse_from_rfc3339("2025-06-10T16:25:00+02:00").unwrap();
             let date = ExtendedCode::FileAttribute(FileAttribute::CreationDate(date));
             assert_code!(date, "%TF.CreationDate,2025-06-10T16:25:00+02:00*%\n");
         }
