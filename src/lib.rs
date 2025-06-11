@@ -41,6 +41,10 @@ pub use crate::macros::*;
 pub use crate::traits::GerberCode;
 pub use crate::types::*;
 
+// re-export some types
+pub use chrono::DateTime;
+pub use uuid::Uuid;
+
 #[cfg(test)]
 mod serialization_tests {
     use super::traits::PartialGerberCode;
