@@ -526,12 +526,17 @@ mod serialization_tests {
             #[test]
             fn test_profile() {
                 let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::Profile(Profile::Plated),
+                    FileFunction::Profile(None),
+                ));
+                assert_code!(func, "%TF.FileFunction,Profile*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Profile(Some(Profile::Plated)),
                 ));
                 assert_code!(func, "%TF.FileFunction,Profile,P*%\n");
 
                 let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::Profile(Profile::NonPlated),
+                    FileFunction::Profile(Some(Profile::NonPlated)),
                 ));
                 assert_code!(func, "%TF.FileFunction,Profile,NP*%\n");
             }

@@ -108,8 +108,11 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                         }
                     }
                     FileFunction::Profile(ref plating) => {
-                        write!(writer, "Profile,")?;
-                        plating.serialize_partial(writer)?;
+                        write!(writer, "Profile")?;
+                        if let Some(ref plating) = plating {
+                            write!(writer, ",")?;
+                            plating.serialize_partial(writer)?;
+                        }
                     }
                     FileFunction::KeepOut(ref pos) => {
                         write!(writer, "Keepout,")?;
