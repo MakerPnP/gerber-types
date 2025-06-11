@@ -948,3 +948,23 @@ impl<W: Write> PartialGerberCode<W> for FiducialScope {
         Ok(())
     }
 }
+
+// ObjectAttribute
+#[derive(Debug, Clone, PartialEq)]
+pub enum ObjectAttribute {
+    UserDefined { name: String, values: Vec<String> },
+}
+
+impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            ObjectAttribute::UserDefined { name, values } => {
+                write!(writer, "{}", name)?;
+                for value in values {
+                    write!(writer, ",{}", value)?;
+                }
+            }
+        };
+        Ok(())
+    }
+}

@@ -124,6 +124,11 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
                 aa.serialize_partial(writer)?;
                 writeln!(writer, "*%")?;
             }
+            ExtendedCode::ObjectAttribute(ref oa) => {
+                write!(writer, "%TO")?;
+                oa.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
         };
         Ok(())
     }

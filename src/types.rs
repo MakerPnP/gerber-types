@@ -86,6 +86,8 @@ pub enum ExtendedCode {
     ApertureBlock(extended_codes::ApertureBlock),
     /// TF
     FileAttribute(attributes::FileAttribute),
+    /// TO
+    ObjectAttribute(attributes::ObjectAttribute),
     /// TA
     ApertureAttribute(attributes::ApertureAttribute),
     /// TD
