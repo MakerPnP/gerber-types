@@ -175,6 +175,14 @@ impl_from_option_integer!(u16);
 
 impl CoordinateNumber {
     pub fn gerber(&self, format: &CoordinateFormat) -> Result<String, GerberError> {
+        self.validate(format)?;
+
+        let divisor: i64 = 10_i64.pow((DECIMAL_PLACES_CHARS - format.decimal) as u32);
+        let number: i64 = Ratio::new(self.nano, divisor).round().to_integer();
+        Ok(number.to_string())
+    }
+
+    pub fn validate(&self, format: &CoordinateFormat) -> Result<(), GerberError> {
         if format.decimal > DECIMAL_PLACES_CHARS {
             return Err(GerberError::CoordinateFormatError(
                 "Invalid precision: Too high!".into(),
@@ -185,10 +193,7 @@ impl CoordinateNumber {
                 "Number is too large for the chosen format!".into(),
             ));
         }
-
-        let divisor: i64 = 10_i64.pow((DECIMAL_PLACES_CHARS - format.decimal) as u32);
-        let number: i64 = Ratio::new(self.nano, divisor).round().to_integer();
-        Ok(number.to_string())
+        Ok(())
     }
 }
 
@@ -567,5 +572,24 @@ mod test {
             CoordinateOffset::new(Some(0), Some(-400), cf44),
             "I0J-4000000"
         );
+    }
+
+    #[test]
+    fn test_validate_too_large_for_format() {
+        // %FSLAX23Y23*%
+        let cf23 = CoordinateFormat::new(2, 3);
+        let number = CoordinateNumber::try_from(100.001).unwrap();
+
+        println!("{:?}", number);
+        // 100_001000 = 100.001 = 2,3
+        // '100' is too large for 2 digits before the decimal point
+        assert!(number.nano == 100_001000);
+
+        let result = number.validate(&cf23);
+        println!("{:?}", result);
+        assert!(matches!(
+            result,
+            Err(GerberError::CoordinateFormatError(str)) if str.eq("Number is too large for the chosen format!")
+        ));
     }
 }
