@@ -54,11 +54,11 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
             FileAttribute::Part(ref part) => {
-                write!(writer, "Part,")?;
+                write!(writer, ".Part,")?;
                 part.serialize_partial(writer)?;
             }
             FileAttribute::FileFunction(ref function) => {
-                write!(writer, "FileFunction,")?;
+                write!(writer, ".FileFunction,")?;
                 match function {
                     FileFunction::Copper {
                         ref layer,
@@ -219,24 +219,24 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                 }
             }
             FileAttribute::FilePolarity(ref p) => {
-                write!(writer, "FilePolarity,")?;
+                write!(writer, ".FilePolarity,")?;
                 p.serialize_partial(writer)?;
             }
             FileAttribute::SameCoordinates(ident) => {
-                write!(writer, "SameCoordinates")?;
+                write!(writer, ".SameCoordinates")?;
                 ident.serialize_partial(writer)?;
             }
             FileAttribute::CreationDate(date) => {
-                write!(writer, "CreationDate,{}", date.to_rfc3339())?;
+                write!(writer, ".CreationDate,{}", date.to_rfc3339())?;
             }
             FileAttribute::GenerationSoftware(ref gs) => {
-                write!(writer, "GenerationSoftware,")?;
+                write!(writer, ".GenerationSoftware,")?;
                 gs.serialize_partial(writer)?;
             }
             FileAttribute::ProjectId { id, guid, revision } => {
-                write!(writer, "ProjectId,{},{},{}", id, guid, revision)?;
+                write!(writer, ".ProjectId,{},{},{}", id, guid, revision)?;
             }
-            FileAttribute::Md5(ref hash) => write!(writer, "MD5,{}", hash)?,
+            FileAttribute::Md5(ref hash) => write!(writer, ".MD5,{}", hash)?,
             FileAttribute::UserDefined { name, values } => {
                 write!(writer, "{}", name)?;
                 for value in values {
@@ -952,12 +952,16 @@ impl<W: Write> PartialGerberCode<W> for FiducialScope {
 // ObjectAttribute
 #[derive(Debug, Clone, PartialEq)]
 pub enum ObjectAttribute {
+    ComponentCharacteristics(ComponentCharacteristics),
     UserDefined { name: String, values: Vec<String> },
 }
 
 impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
+            ObjectAttribute::ComponentCharacteristics(cc) => {
+                cc.serialize_partial(writer)?;
+            }
             ObjectAttribute::UserDefined { name, values } => {
                 write!(writer, "{}", name)?;
                 for value in values {
@@ -965,6 +969,125 @@ impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
                 }
             }
         };
+        Ok(())
+    }
+}
+
+// ComponentCharacteristics
+// 2024.05 - 5.6.1.6 "Cxxx (Component Characteristics)"
+#[derive(Debug, Clone, PartialEq)]
+pub enum ComponentCharacteristics {
+    /// ".CRot,<decimal>"
+    Rotation(f64),
+    /// ".CMfr,<field>"
+    Manufacturer(String),
+    /// ".CMPN,<field>"
+    MPN(String),
+    /// ".CVal,<field>"
+    Value(String),
+    /// ".CMnt,(TH|SMD|Pressfit|Other)"
+    Mount(ComponentMounting),
+    /// ".CFtp,<field>"
+    Footprint(String),
+    /// ".CPgN,<field>"
+    PackageName(String),
+    /// ".CPgD,<field>"
+    PackageDescription(String),
+    /// ".CHgt,<decimal>"
+    Height(f64),
+    /// ".CLbN,<field>"
+    LibraryName(String),
+    /// ".CLbD,<field>"
+    LibraryDescription(String),
+    /// The specification requires at least one supplier part.  Do not add the attribute if there are no supplier parts.
+    /// ".CSup,<SN>,<SPN>,{<SN>,<SPN>}"
+    Supplier(Vec<SupplierPart>),
+}
+
+impl<W: Write> PartialGerberCode<W> for ComponentCharacteristics {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            ComponentCharacteristics::Rotation(rotation) => {
+                write!(writer, ".CRot,{}", rotation)?;
+            }
+            ComponentCharacteristics::Manufacturer(manufacturer) => {
+                write!(writer, ".CMfr,{}", manufacturer)?;
+            }
+            ComponentCharacteristics::MPN(mpn) => {
+                write!(writer, ".CMPN,{}", mpn)?;
+            }
+            ComponentCharacteristics::Value(value) => {
+                write!(writer, ".CVal,{}", value)?;
+            }
+            ComponentCharacteristics::Mount(mount) => {
+                write!(writer, ".CMnt,")?;
+                mount.serialize_partial(writer)?;
+            }
+            ComponentCharacteristics::Footprint(footprint) => {
+                write!(writer, ".CFtp,{}", footprint)?;
+            }
+            ComponentCharacteristics::PackageName(package_name) => {
+                write!(writer, ".CPgN,{}", package_name)?;
+            }
+            ComponentCharacteristics::PackageDescription(package_description) => {
+                write!(writer, ".CPgD,{}", package_description)?;
+            }
+            ComponentCharacteristics::Height(height) => {
+                write!(writer, ".CHgt,{}", height)?;
+            }
+            ComponentCharacteristics::LibraryName(library_name) => {
+                write!(writer, ".CLbN,{}", library_name)?;
+            }
+            ComponentCharacteristics::LibraryDescription(library_description) => {
+                write!(writer, ".CLbD,{}", library_description)?;
+            }
+            ComponentCharacteristics::Supplier(values) => {
+                write!(writer, ".CSup")?;
+                for value in values {
+                    write!(writer, ",")?;
+                    value.serialize_partial(writer)?;
+                }
+            }
+        }
+        Ok(())
+    }
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ComponentMounting {
+    ThroughHole,
+    /// Surface mount device
+    SMD,
+    PressFit,
+    Other,
+}
+
+impl<W: Write> PartialGerberCode<W> for ComponentMounting {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            ComponentMounting::ThroughHole => write!(writer, "TH")?,
+            ComponentMounting::SMD => write!(writer, "SMD")?,
+            ComponentMounting::PressFit => write!(writer, "Pressfit")?,
+            ComponentMounting::Other => write!(writer, "Other")?,
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SupplierPart {
+    /// The name of the supplier, e.g. 'Mouser', 'Digikey', 'LCSC', etc.
+    pub supplier_name: String,
+    /// The spec says 'supplier part name' but using 'reference' is more accurate, as that is what they use to look up the part
+    pub supplier_part_reference: String,
+}
+
+impl<W: Write> PartialGerberCode<W> for SupplierPart {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(
+            writer,
+            "{},{}",
+            self.supplier_name, self.supplier_part_reference
+        )?;
         Ok(())
     }
 }

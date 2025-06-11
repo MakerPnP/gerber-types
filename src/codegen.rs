@@ -107,7 +107,7 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
                 writeln!(writer, "*%")?;
             }
             ExtendedCode::FileAttribute(ref attr) => {
-                write!(writer, "%TF.")?;
+                write!(writer, "%TF")?;
                 attr.serialize_partial(writer)?;
                 writeln!(writer, "*%")?;
             }

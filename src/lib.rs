@@ -42,7 +42,7 @@ pub use crate::traits::GerberCode;
 pub use crate::types::*;
 
 #[cfg(test)]
-mod serializaion_tests {
+mod serialization_tests {
     use super::traits::PartialGerberCode;
     use super::*;
     use chrono::DateTime;
@@ -158,110 +158,114 @@ mod serializaion_tests {
         assert_code!(c2, "%MOIN*%\n");
     }
 
-    #[test]
-    fn test_aperture_circle_definition() {
-        let ad1 = ApertureDefinition {
-            code: 10,
-            aperture: Aperture::Circle(Circle {
-                diameter: 4.0,
-                hole_diameter: Some(2.0),
-            }),
-        };
-        let ad2 = ApertureDefinition {
-            code: 11,
-            aperture: Aperture::Circle(Circle {
-                diameter: 4.5,
-                hole_diameter: None,
-            }),
-        };
-        assert_partial_code!(ad1, "10C,4X2");
-        assert_partial_code!(ad2, "11C,4.5");
-    }
+    mod aperture_definition {
+        use super::*;
 
-    #[test]
-    fn test_aperture_rectangular_definition() {
-        let ad1 = ApertureDefinition {
-            code: 12,
-            aperture: Aperture::Rectangle(Rectangular {
-                x: 1.5,
-                y: 2.25,
-                hole_diameter: Some(3.8),
-            }),
-        };
-        let ad2 = ApertureDefinition {
-            code: 13,
-            aperture: Aperture::Rectangle(Rectangular {
-                x: 1.0,
-                y: 1.0,
-                hole_diameter: None,
-            }),
-        };
-        let ad3 = ApertureDefinition {
-            code: 14,
-            aperture: Aperture::Obround(Rectangular {
-                x: 2.0,
-                y: 4.5,
-                hole_diameter: None,
-            }),
-        };
-        assert_partial_code!(ad1, "12R,1.5X2.25X3.8");
-        assert_partial_code!(ad2, "13R,1X1");
-        assert_partial_code!(ad3, "14O,2X4.5");
-    }
+        #[test]
+        fn test_circle_definition() {
+            let ad1 = ApertureDefinition {
+                code: 10,
+                aperture: Aperture::Circle(Circle {
+                    diameter: 4.0,
+                    hole_diameter: Some(2.0),
+                }),
+            };
+            let ad2 = ApertureDefinition {
+                code: 11,
+                aperture: Aperture::Circle(Circle {
+                    diameter: 4.5,
+                    hole_diameter: None,
+                }),
+            };
+            assert_partial_code!(ad1, "10C,4X2");
+            assert_partial_code!(ad2, "11C,4.5");
+        }
 
-    #[test]
-    fn test_aperture_polygon_definition() {
-        let ad1 = ApertureDefinition {
-            code: 15,
-            aperture: Aperture::Polygon(Polygon {
-                diameter: 4.5,
-                vertices: 3,
-                rotation: None,
-                hole_diameter: None,
-            }),
-        };
-        let ad2 = ApertureDefinition {
-            code: 16,
-            aperture: Aperture::Polygon(Polygon {
-                diameter: 5.0,
-                vertices: 4,
-                rotation: Some(30.6),
-                hole_diameter: None,
-            }),
-        };
-        let ad3 = ApertureDefinition {
-            code: 17,
-            aperture: Aperture::Polygon(Polygon {
-                diameter: 5.5,
-                vertices: 5,
-                rotation: None,
-                hole_diameter: Some(1.8),
-            }),
-        };
-        assert_partial_code!(ad1, "15P,4.5X3");
-        assert_partial_code!(ad2, "16P,5X4X30.6");
-        assert_partial_code!(ad3, "17P,5.5X5X0X1.8");
-    }
+        #[test]
+        fn test_rectangular_definition() {
+            let ad1 = ApertureDefinition {
+                code: 12,
+                aperture: Aperture::Rectangle(Rectangular {
+                    x: 1.5,
+                    y: 2.25,
+                    hole_diameter: Some(3.8),
+                }),
+            };
+            let ad2 = ApertureDefinition {
+                code: 13,
+                aperture: Aperture::Rectangle(Rectangular {
+                    x: 1.0,
+                    y: 1.0,
+                    hole_diameter: None,
+                }),
+            };
+            let ad3 = ApertureDefinition {
+                code: 14,
+                aperture: Aperture::Obround(Rectangular {
+                    x: 2.0,
+                    y: 4.5,
+                    hole_diameter: None,
+                }),
+            };
+            assert_partial_code!(ad1, "12R,1.5X2.25X3.8");
+            assert_partial_code!(ad2, "13R,1X1");
+            assert_partial_code!(ad3, "14O,2X4.5");
+        }
 
-    #[test]
-    fn test_aperture_macro_definition() {
-        let m1 = ApertureDefinition {
-            code: 42,
-            aperture: Aperture::Macro("NO_ARGS1".to_string(), None),
-        };
-        let m2 = ApertureDefinition {
-            code: 69,
-            aperture: Aperture::Macro(
-                "With_Args2".to_string(),
-                Some(vec![
-                    MacroDecimal::Variable(1),
-                    MacroDecimal::Value(0.25),
-                    MacroDecimal::Expression("$1x$2".to_string()),
-                ]),
-            ),
-        };
-        assert_partial_code!(m1, "42NO_ARGS1");
-        assert_partial_code!(m2, "69With_Args2,$1X0.25X$1x$2");
+        #[test]
+        fn test_polygon_definition() {
+            let ad1 = ApertureDefinition {
+                code: 15,
+                aperture: Aperture::Polygon(Polygon {
+                    diameter: 4.5,
+                    vertices: 3,
+                    rotation: None,
+                    hole_diameter: None,
+                }),
+            };
+            let ad2 = ApertureDefinition {
+                code: 16,
+                aperture: Aperture::Polygon(Polygon {
+                    diameter: 5.0,
+                    vertices: 4,
+                    rotation: Some(30.6),
+                    hole_diameter: None,
+                }),
+            };
+            let ad3 = ApertureDefinition {
+                code: 17,
+                aperture: Aperture::Polygon(Polygon {
+                    diameter: 5.5,
+                    vertices: 5,
+                    rotation: None,
+                    hole_diameter: Some(1.8),
+                }),
+            };
+            assert_partial_code!(ad1, "15P,4.5X3");
+            assert_partial_code!(ad2, "16P,5X4X30.6");
+            assert_partial_code!(ad3, "17P,5.5X5X0X1.8");
+        }
+
+        #[test]
+        fn test_macro_definition() {
+            let m1 = ApertureDefinition {
+                code: 42,
+                aperture: Aperture::Macro("NO_ARGS1".to_string(), None),
+            };
+            let m2 = ApertureDefinition {
+                code: 69,
+                aperture: Aperture::Macro(
+                    "With_Args2".to_string(),
+                    Some(vec![
+                        MacroDecimal::Variable(1),
+                        MacroDecimal::Value(0.25),
+                        MacroDecimal::Expression("$1x$2".to_string()),
+                    ]),
+                ),
+            };
+            assert_partial_code!(m1, "42NO_ARGS1");
+            assert_partial_code!(m2, "69With_Args2,$1X0.25X$1x$2");
+        }
     }
 
     #[test]
@@ -286,7 +290,7 @@ mod serializaion_tests {
     }
 
     #[test]
-    fn test_aperture_block_serialize() {
+    fn test_aperture_block() {
         let o = ExtendedCode::ApertureBlock(ApertureBlock::Open { code: 102 });
         let c = ExtendedCode::ApertureBlock(ApertureBlock::Close);
         assert_code!(o, "%AB102*%\n");
@@ -299,445 +303,443 @@ mod serializaion_tests {
         assert_code!(d, "%TDfoo*%\n");
     }
 
-    #[test]
-    fn test_file_attribute_part() {
-        let part = ExtendedCode::FileAttribute(FileAttribute::Part(Part::Other("Part 1".into())));
-        assert_code!(part, "%TF.Part,Other,Part 1*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_generation_software() {
-        let gensw1 = ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(
-            GenerationSoftware::new("Vendor 1", "App 1", None),
-        ));
-        assert_code!(gensw1, "%TF.GenerationSoftware,Vendor 1,App 1*%\n");
-
-        let gensw2 = ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(
-            GenerationSoftware::new("Vendor 1", "App 1", Some("1.2.3")),
-        ));
-        assert_code!(gensw2, "%TF.GenerationSoftware,Vendor 1,App 1,1.2.3*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_creation_date() {
-        let date = DateTime::parse_from_rfc3339("2025-06-10T16:25:00+02:00").unwrap();
-        let date = ExtendedCode::FileAttribute(FileAttribute::CreationDate(date));
-        assert_code!(date, "%TF.CreationDate,2025-06-10T16:25:00+02:00*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_project_id() {
-        let proj = ExtendedCode::FileAttribute(FileAttribute::ProjectId {
-            id: "Project".into(),
-            guid: Uuid::max(),
-            revision: "rev1".into(),
-        });
-        assert_code!(
-            proj,
-            "%TF.ProjectId,Project,ffffffff-ffff-ffff-ffff-ffffffffffff,rev1*%\n"
-        );
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_copper() {
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Copper {
-            layer: 1,
-            pos: ExtendedPosition::Top,
-            copper_type: None,
-        }));
-        assert_code!(func, "%TF.FileFunction,Copper,L1,Top*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Copper {
-            layer: 2,
-            pos: ExtendedPosition::Bottom,
-            copper_type: Some(CopperType::Hatched),
-        }));
-        assert_code!(func, "%TF.FileFunction,Copper,L2,Bot,Hatched*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Copper {
-            layer: 3,
-            pos: ExtendedPosition::Bottom,
-            copper_type: Some(CopperType::Mixed),
-        }));
-        assert_code!(func, "%TF.FileFunction,Copper,L3,Bot,Mixed*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Copper {
-            layer: 4,
-            pos: ExtendedPosition::Bottom,
-            copper_type: Some(CopperType::Plane),
-        }));
-        assert_code!(func, "%TF.FileFunction,Copper,L4,Bot,Plane*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Copper {
-            layer: 5,
-            pos: ExtendedPosition::Bottom,
-            copper_type: Some(CopperType::Signal),
-        }));
-        assert_code!(func, "%TF.FileFunction,Copper,L5,Bot,Signal*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_plated() {
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
-            from_layer: 1,
-            to_layer: 2,
-            drill: PlatedDrill::Blind,
-            label: None,
-        }));
-        assert_code!(func, "%TF.FileFunction,Plated,1,2,Blind*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
-            from_layer: 1,
-            to_layer: 4,
-            drill: PlatedDrill::PlatedThroughHole,
-            label: None,
-        }));
-        assert_code!(func, "%TF.FileFunction,Plated,1,4,PTH*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
-            from_layer: 2,
-            to_layer: 3,
-            drill: PlatedDrill::Buried,
-            label: None,
-        }));
-        assert_code!(func, "%TF.FileFunction,Plated,2,3,Buried*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
-            from_layer: 1,
-            to_layer: 2,
-            drill: PlatedDrill::PlatedThroughHole,
-            label: Some(DrillRouteType::Drill),
-        }));
-        assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Drill*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
-            from_layer: 1,
-            to_layer: 2,
-            drill: PlatedDrill::PlatedThroughHole,
-            label: Some(DrillRouteType::Mixed),
-        }));
-        assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Mixed*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Plated {
-            from_layer: 1,
-            to_layer: 2,
-            drill: PlatedDrill::PlatedThroughHole,
-            label: Some(DrillRouteType::Route),
-        }));
-        assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Rout*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_non_plated() {
-        let func =
-            ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
-                from_layer: 1,
-                to_layer: 2,
-                drill: NonPlatedDrill::Blind,
-                label: None,
-            }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,Blind*%\n");
-
-        let func =
-            ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
-                from_layer: 1,
-                to_layer: 4,
-                drill: NonPlatedDrill::NonPlatedThroughHole,
-                label: None,
-            }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,4,NPTH*%\n");
-
-        let func =
-            ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
-                from_layer: 2,
-                to_layer: 3,
-                drill: NonPlatedDrill::Buried,
-                label: None,
-            }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,2,3,Buried*%\n");
-
-        let func =
-            ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
-                from_layer: 1,
-                to_layer: 2,
-                drill: NonPlatedDrill::NonPlatedThroughHole,
-                label: Some(DrillRouteType::Drill),
-            }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Drill*%\n");
-
-        let func =
-            ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
-                from_layer: 1,
-                to_layer: 2,
-                drill: NonPlatedDrill::NonPlatedThroughHole,
-                label: Some(DrillRouteType::Mixed),
-            }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Mixed*%\n");
-
-        let func =
-            ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::NonPlated {
-                from_layer: 1,
-                to_layer: 2,
-                drill: NonPlatedDrill::NonPlatedThroughHole,
-                label: Some(DrillRouteType::Route),
-            }));
-        assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Rout*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_profile() {
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Profile(
-            Profile::Plated,
-        )));
-        assert_code!(func, "%TF.FileFunction,Profile,P*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::Profile(
-            Profile::NonPlated,
-        )));
-        assert_code!(func, "%TF.FileFunction,Profile,NP*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_keepout() {
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::KeepOut(
-            Position::Top,
-        )));
-        assert_code!(func, "%TF.FileFunction,Keepout,Top*%\n");
-
-        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::KeepOut(
-            Position::Bottom,
-        )));
-        assert_code!(func, "%TF.FileFunction,Keepout,Bot*%\n");
-    }
-
-    macro_rules! test_position_and_index {
-        ($test:ident, $ff:ident, $value:literal) => {
-            #[test]
-            fn $test() {
-                let func =
-                    ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::$ff {
-                        pos: Position::Top,
-                        index: None,
-                    }));
-                assert_code!(func, &format!("%TF.FileFunction,{},Top*%\n", $value));
-
-                let func =
-                    ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::$ff {
-                        pos: Position::Top,
-                        index: Some(1),
-                    }));
-                assert_code!(func, &format!("%TF.FileFunction,{},Top,1*%\n", $value));
-
-                let func =
-                    ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::$ff {
-                        pos: Position::Bottom,
-                        index: None,
-                    }));
-                assert_code!(func, &format!("%TF.FileFunction,{},Bot*%\n", $value));
-            }
-        };
-    }
-
-    macro_rules! test_layer_and_position {
-        ($test:ident, $ff:ident, $value:literal) => {
-            #[test]
-            fn $test() {
-                let func =
-                    ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::$ff {
-                        pos: Position::Top,
-                        layer: 1,
-                    }));
-                assert_code!(func, &format!("%TF.FileFunction,{},L{},Top*%\n", $value, 1));
-
-                let func =
-                    ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::$ff {
-                        pos: Position::Bottom,
-                        layer: 2,
-                    }));
-                assert_code!(func, &format!("%TF.FileFunction,{},L{},Bot*%\n", $value, 2));
-            }
-        };
-    }
-
-    macro_rules! test_position {
-        ($test:ident, $ff:ident, $value:literal) => {
-            #[test]
-            fn $test() {
-                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::$ff(Position::Top),
-                ));
-                assert_code!(func, &format!("%TF.FileFunction,{},Top*%\n", $value));
-
-                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::$ff(Position::Bottom),
-                ));
-                assert_code!(func, &format!("%TF.FileFunction,{},Bot*%\n", $value));
-            }
-        };
-    }
-
-    macro_rules! test_optional_position {
-        ($test:ident, $ff:ident, $value:literal) => {
-            #[test]
-            fn $test() {
-                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::$ff(None),
-                ));
-                assert_code!(func, &format!("%TF.FileFunction,{}*%\n", $value));
-
-                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::$ff(Some(Position::Top)),
-                ));
-                assert_code!(func, &format!("%TF.FileFunction,{},Top*%\n", $value));
-
-                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::$ff(Some(Position::Bottom)),
-                ));
-                assert_code!(func, &format!("%TF.FileFunction,{},Bot*%\n", $value));
-            }
-        };
-    }
-    macro_rules! test_simple {
-        ($test:ident, $ff:ident, $value:literal) => {
-            #[test]
-            fn $test() {
-                let func =
-                    ExtendedCode::FileAttribute(FileAttribute::FileFunction(FileFunction::$ff));
-                assert_code!(func, &format!("%TF.FileFunction,{}*%\n", $value));
-            }
-        };
-    }
-
-    macro_rules! test_string {
-        ($test:ident, $ff:ident, $value:literal) => {
-            #[test]
-            fn $test() {
-                let string = "A String".to_string();
-                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
-                    FileFunction::$ff(string.clone()),
-                ));
-                assert_code!(func, &format!("%TF.FileFunction,{},{}*%\n", $value, string));
-            }
-        };
-    }
-
     mod file_attribute {
         use super::*;
-        //
-        // It should be noted that the gerber spec is very-inconsistent with casing, e.g. "Soldermask" vs "AssemblyDrawing"
-        //
-
-        test_position_and_index!(
-            test_file_attribute_file_function_soldermask,
-            SolderMask,
-            "Soldermask"
-        );
-        test_position_and_index!(test_file_attribute_file_function_legend, Legend, "Legend");
-        test_layer_and_position!(
-            test_file_attribute_file_function_component,
-            Component,
-            "Component"
-        );
-        test_position!(test_file_attribute_file_function_paste, Paste, "Paste");
-        test_position!(test_file_attribute_file_function_glue, Glue, "Glue");
-        test_position_and_index!(
-            test_file_attribute_file_function_carbonmask,
-            CarbonMask,
-            "Carbonmask"
-        );
-        test_position_and_index!(
-            test_file_attribute_file_function_goldmask,
-            GoldMask,
-            "Goldmask"
-        );
-        test_position_and_index!(
-            test_file_attribute_file_function_heatsinkmask,
-            HeatsinkMask,
-            "Heatsinkmask"
-        );
-        test_position_and_index!(
-            test_file_attribute_file_function_peelablemask,
-            PeelableMask,
-            "Peelablemask"
-        );
-        test_position_and_index!(
-            test_file_attribute_file_function_silvermask,
-            SilverMask,
-            "Silvermask"
-        );
-        test_position_and_index!(
-            test_file_attribute_file_function_tinmask,
-            TinMask,
-            "Tinmask"
-        );
-        test_position!(
-            test_file_attribute_file_function_depthroute,
-            DepthRoute,
-            "Depthrout"
-        );
-        test_optional_position!(test_file_attribute_file_function_vcut, VCut, "Vcut");
-        test_simple!(
-            test_file_attribute_file_function_viafill,
-            ViaFill,
-            "Viafill"
-        );
-        test_position!(test_file_attribute_file_function_pads, Pads, "Pads");
-        test_string!(test_file_attribute_file_function_other, Other, "Other");
-        test_simple!(
-            test_file_attribute_file_function_drillmap,
-            DrillMap,
-            "Drillmap"
-        );
-        test_simple!(
-            test_file_attribute_file_function_fabricationdrawing,
-            FabricationDrawing,
-            "FabricationDrawing"
-        );
-        test_simple!(
-            test_file_attribute_file_function_vcutmap,
-            VCutMap,
-            "Vcutmap"
-        );
-        test_position!(
-            test_file_attribute_file_function_assemblydrawing,
-            AssemblyDrawing,
-            "AssemblyDrawing"
-        );
-        test_simple!(
-            test_file_attribute_file_function_arraydrawing,
-            ArrayDrawing,
-            "ArrayDrawing"
-        );
-        test_string!(
-            test_file_attribute_file_function_otherdrawing,
-            OtherDrawing,
-            "OtherDrawing"
-        );
-
         #[test]
-        fn test_file_attribute_file_polarity() {
-            let pol =
-                ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Positive));
-            assert_code!(pol, "%TF.FilePolarity,Positive*%\n");
-
-            let pol =
-                ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Negative));
-            assert_code!(pol, "%TF.FilePolarity,Negative*%\n");
+        fn test_part() {
+            let part =
+                ExtendedCode::FileAttribute(FileAttribute::Part(Part::Other("Part 1".into())));
+            assert_code!(part, "%TF.Part,Other,Part 1*%\n");
         }
 
         #[test]
-        fn test_file_attribute_file_function_md5() {
-            let md5 = ExtendedCode::FileAttribute(FileAttribute::Md5("abcd1234".into()));
-            assert_code!(md5, "%TF.MD5,abcd1234*%\n");
+        fn test_generation_software() {
+            let gensw1 = ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(
+                GenerationSoftware::new("Vendor 1", "App 1", None),
+            ));
+            assert_code!(gensw1, "%TF.GenerationSoftware,Vendor 1,App 1*%\n");
+
+            let gensw2 = ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(
+                GenerationSoftware::new("Vendor 1", "App 1", Some("1.2.3")),
+            ));
+            assert_code!(gensw2, "%TF.GenerationSoftware,Vendor 1,App 1,1.2.3*%\n");
         }
 
         #[test]
-        fn test_file_attribute_file_function_user_defined() {
-            let owner = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
-                name: "Authors".to_string(),
-                values: vec!["Author 1".to_string(), "Author 2".to_string()],
+        fn test_creation_date() {
+            let date = DateTime::parse_from_rfc3339("2025-06-10T16:25:00+02:00").unwrap();
+            let date = ExtendedCode::FileAttribute(FileAttribute::CreationDate(date));
+            assert_code!(date, "%TF.CreationDate,2025-06-10T16:25:00+02:00*%\n");
+        }
+
+        #[test]
+        fn test_project_id() {
+            let proj = ExtendedCode::FileAttribute(FileAttribute::ProjectId {
+                id: "Project".into(),
+                guid: Uuid::max(),
+                revision: "rev1".into(),
             });
-            assert_code!(owner, "%TF.Authors,Author 1,Author 2*%\n");
+            assert_code!(
+                proj,
+                "%TF.ProjectId,Project,ffffffff-ffff-ffff-ffff-ffffffffffff,rev1*%\n"
+            );
+        }
+
+        mod file_function {
+            use super::*;
+            #[test]
+            fn test_copper() {
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Copper {
+                        layer: 1,
+                        pos: ExtendedPosition::Top,
+                        copper_type: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Copper,L1,Top*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Copper {
+                        layer: 2,
+                        pos: ExtendedPosition::Bottom,
+                        copper_type: Some(CopperType::Hatched),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Copper,L2,Bot,Hatched*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Copper {
+                        layer: 3,
+                        pos: ExtendedPosition::Bottom,
+                        copper_type: Some(CopperType::Mixed),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Copper,L3,Bot,Mixed*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Copper {
+                        layer: 4,
+                        pos: ExtendedPosition::Bottom,
+                        copper_type: Some(CopperType::Plane),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Copper,L4,Bot,Plane*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Copper {
+                        layer: 5,
+                        pos: ExtendedPosition::Bottom,
+                        copper_type: Some(CopperType::Signal),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Copper,L5,Bot,Signal*%\n");
+            }
+
+            #[test]
+            fn test_plated() {
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Plated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: PlatedDrill::Blind,
+                        label: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Plated,1,2,Blind*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Plated {
+                        from_layer: 1,
+                        to_layer: 4,
+                        drill: PlatedDrill::PlatedThroughHole,
+                        label: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Plated,1,4,PTH*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Plated {
+                        from_layer: 2,
+                        to_layer: 3,
+                        drill: PlatedDrill::Buried,
+                        label: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Plated,2,3,Buried*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Plated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: PlatedDrill::PlatedThroughHole,
+                        label: Some(DrillRouteType::Drill),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Drill*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Plated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: PlatedDrill::PlatedThroughHole,
+                        label: Some(DrillRouteType::Mixed),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Mixed*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Plated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: PlatedDrill::PlatedThroughHole,
+                        label: Some(DrillRouteType::Route),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,Plated,1,2,PTH,Rout*%\n");
+            }
+
+            #[test]
+            fn test_non_plated() {
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::NonPlated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: NonPlatedDrill::Blind,
+                        label: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,NonPlated,1,2,Blind*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::NonPlated {
+                        from_layer: 1,
+                        to_layer: 4,
+                        drill: NonPlatedDrill::NonPlatedThroughHole,
+                        label: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,NonPlated,1,4,NPTH*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::NonPlated {
+                        from_layer: 2,
+                        to_layer: 3,
+                        drill: NonPlatedDrill::Buried,
+                        label: None,
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,NonPlated,2,3,Buried*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::NonPlated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: NonPlatedDrill::NonPlatedThroughHole,
+                        label: Some(DrillRouteType::Drill),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Drill*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::NonPlated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: NonPlatedDrill::NonPlatedThroughHole,
+                        label: Some(DrillRouteType::Mixed),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Mixed*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::NonPlated {
+                        from_layer: 1,
+                        to_layer: 2,
+                        drill: NonPlatedDrill::NonPlatedThroughHole,
+                        label: Some(DrillRouteType::Route),
+                    },
+                ));
+                assert_code!(func, "%TF.FileFunction,NonPlated,1,2,NPTH,Rout*%\n");
+            }
+
+            #[test]
+            fn test_profile() {
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Profile(Profile::Plated),
+                ));
+                assert_code!(func, "%TF.FileFunction,Profile,P*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::Profile(Profile::NonPlated),
+                ));
+                assert_code!(func, "%TF.FileFunction,Profile,NP*%\n");
+            }
+
+            #[test]
+            fn test_keepout() {
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::KeepOut(Position::Top),
+                ));
+                assert_code!(func, "%TF.FileFunction,Keepout,Top*%\n");
+
+                let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                    FileFunction::KeepOut(Position::Bottom),
+                ));
+                assert_code!(func, "%TF.FileFunction,Keepout,Bot*%\n");
+            }
+
+            macro_rules! test_position_and_index {
+                ($test:ident, $ff:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff {
+                                pos: Position::Top,
+                                index: None,
+                            },
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Top*%\n", $value));
+
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff {
+                                pos: Position::Top,
+                                index: Some(1),
+                            },
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Top,1*%\n", $value));
+
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff {
+                                pos: Position::Bottom,
+                                index: None,
+                            },
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Bot*%\n", $value));
+                    }
+                };
+            }
+
+            macro_rules! test_layer_and_position {
+                ($test:ident, $ff:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff {
+                                pos: Position::Top,
+                                layer: 1,
+                            },
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},L{},Top*%\n", $value, 1));
+
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff {
+                                pos: Position::Bottom,
+                                layer: 2,
+                            },
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},L{},Bot*%\n", $value, 2));
+                    }
+                };
+            }
+
+            macro_rules! test_position {
+                ($test:ident, $ff:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff(Position::Top),
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Top*%\n", $value));
+
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff(Position::Bottom),
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Bot*%\n", $value));
+                    }
+                };
+            }
+
+            macro_rules! test_optional_position {
+                ($test:ident, $ff:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff(None),
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{}*%\n", $value));
+
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff(Some(Position::Top)),
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Top*%\n", $value));
+
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff(Some(Position::Bottom)),
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},Bot*%\n", $value));
+                    }
+                };
+            }
+            macro_rules! test_simple {
+                ($test:ident, $ff:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff,
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{}*%\n", $value));
+                    }
+                };
+            }
+
+            macro_rules! test_string {
+                ($test:ident, $ff:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let string = "A String".to_string();
+                        let func = ExtendedCode::FileAttribute(FileAttribute::FileFunction(
+                            FileFunction::$ff(string.clone()),
+                        ));
+                        assert_code!(func, &format!("%TF.FileFunction,{},{}*%\n", $value, string));
+                    }
+                };
+            }
+
+            //
+            // It should be noted that the gerber spec is very-inconsistent with casing, e.g. "Soldermask" vs "AssemblyDrawing"
+            //
+
+            test_position_and_index!(test_soldermask, SolderMask, "Soldermask");
+            test_position_and_index!(test_legend, Legend, "Legend");
+            test_layer_and_position!(test_component, Component, "Component");
+            test_position!(test_paste, Paste, "Paste");
+            test_position!(test_glue, Glue, "Glue");
+            test_position_and_index!(test_carbonmask, CarbonMask, "Carbonmask");
+            test_position_and_index!(test_goldmask, GoldMask, "Goldmask");
+            test_position_and_index!(test_heatsinkmask, HeatsinkMask, "Heatsinkmask");
+            test_position_and_index!(test_peelablemask, PeelableMask, "Peelablemask");
+            test_position_and_index!(test_silvermask, SilverMask, "Silvermask");
+            test_position_and_index!(test_tinmask, TinMask, "Tinmask");
+            test_position!(test_depthroute, DepthRoute, "Depthrout");
+            test_optional_position!(test_vcut, VCut, "Vcut");
+            test_simple!(test_viafill, ViaFill, "Viafill");
+            test_position!(test_pads, Pads, "Pads");
+            test_string!(test_other, Other, "Other");
+            test_simple!(test_drillmap, DrillMap, "Drillmap");
+            test_simple!(
+                test_fabricationdrawing,
+                FabricationDrawing,
+                "FabricationDrawing"
+            );
+            test_simple!(test_vcutmap, VCutMap, "Vcutmap");
+            test_position!(test_assemblydrawing, AssemblyDrawing, "AssemblyDrawing");
+            test_simple!(test_arraydrawing, ArrayDrawing, "ArrayDrawing");
+            test_string!(test_otherdrawing, OtherDrawing, "OtherDrawing");
+
+            #[test]
+            fn test_polarity() {
+                let pol = ExtendedCode::FileAttribute(FileAttribute::FilePolarity(
+                    FilePolarity::Positive,
+                ));
+                assert_code!(pol, "%TF.FilePolarity,Positive*%\n");
+
+                let pol = ExtendedCode::FileAttribute(FileAttribute::FilePolarity(
+                    FilePolarity::Negative,
+                ));
+                assert_code!(pol, "%TF.FilePolarity,Negative*%\n");
+            }
+
+            #[test]
+            fn test_md5() {
+                let md5 = ExtendedCode::FileAttribute(FileAttribute::Md5("abcd1234".into()));
+                assert_code!(md5, "%TF.MD5,abcd1234*%\n");
+            }
+
+            mod user_defined_attribute {
+                use super::*;
+
+                #[test]
+                fn test_non_standard() {
+                    let function = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
+                        name: "NonStandardAttribute".to_string(),
+                        values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
+                    });
+                    // NOTE there is no '.' prefix, spaces are not trimmed
+                    assert_code!(function, "%TFNonStandardAttribute,Value 1 , Value 2*%\n");
+                }
+
+                #[test]
+                fn test_unsupported_standard() {
+                    let function = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
+                        name: ".UnsupportedStandardAttribute".to_string(),
+                        values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
+                    });
+                    // NOTE there *is* a '.' prefix, spaces are not trimmed
+                    assert_code!(
+                        function,
+                        "%TF.UnsupportedStandardAttribute,Value 1 , Value 2*%\n"
+                    );
+                }
+            }
         }
     }
 
@@ -748,7 +750,7 @@ mod serializaion_tests {
         //
 
         #[test]
-        fn test_aperture_attribute_via_drill() {
+        fn test_via_drill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ViaDrill(None),
             ));
@@ -816,7 +818,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_backdrill() {
+        fn test_backdrill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::BackDrill,
             ));
@@ -824,7 +826,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_component_drill() {
+        fn test_component_drill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ComponentDrill { press_fit: None },
             ));
@@ -846,7 +848,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_mechanical_drill() {
+        fn test_mechanical_drill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::MechanicalDrill { function: None },
             ));
@@ -875,7 +877,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_catellated_drill() {
+        fn test_catellated_drill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::CastellatedDrill,
             ));
@@ -883,7 +885,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_other_drill() {
+        fn test_other_drill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::OtherDrill("CustomDrill".to_string()),
             ));
@@ -894,7 +896,7 @@ mod serializaion_tests {
         // "Copper layers"
         //
         #[test]
-        fn test_aperture_attribute_component_pad() {
+        fn test_component_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ComponentPad,
             ));
@@ -902,7 +904,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_smd_pad() {
+        fn test_smd_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::SmdPad(SmdPadType::CopperDefined),
             ));
@@ -915,7 +917,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_bga_pad() {
+        fn test_bga_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::BgaPad(SmdPadType::CopperDefined),
             ));
@@ -928,7 +930,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_connector_pad() {
+        fn test_connector_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ConnectorPad,
             ));
@@ -936,7 +938,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_headsink_pad() {
+        fn test_headsink_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::HeatsinkPad,
             ));
@@ -944,7 +946,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_via_pad() {
+        fn test_via_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ViaPad,
             ));
@@ -952,7 +954,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_test_pad() {
+        fn test_test_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::TestPad,
             ));
@@ -960,7 +962,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_castellated_pad() {
+        fn test_castellated_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::CastellatedPad,
             ));
@@ -968,7 +970,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_fiducial_pad() {
+        fn test_fiducial_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::FiducialPad(FiducialScope::Global),
             ));
@@ -986,7 +988,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_thermal_relief_pad() {
+        fn test_thermal_relief_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ThermalReliefPad,
             ));
@@ -994,7 +996,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_washer_pad() {
+        fn test_washer_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::WasherPad,
             ));
@@ -1002,7 +1004,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_anti_pad() {
+        fn test_anti_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::AntiPad,
             ));
@@ -1010,7 +1012,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_other_pad() {
+        fn test_other_pad() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::OtherPad("CustomPad".to_string()),
             ));
@@ -1018,7 +1020,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_conductor() {
+        fn test_conductor() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Conductor,
             ));
@@ -1026,7 +1028,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_etched_component() {
+        fn test_etched_component() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::EtchedComponent,
             ));
@@ -1034,7 +1036,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_non_conductor() {
+        fn test_non_conductor() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::NonConductor,
             ));
@@ -1042,7 +1044,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_copper_balancing() {
+        fn test_copper_balancing() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::CopperBalancing,
             ));
@@ -1050,7 +1052,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_border() {
+        fn test_border() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Border,
             ));
@@ -1058,7 +1060,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_other_copper() {
+        fn test_other_copper() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::OtherCopper("CustomCopper".to_string()),
             ));
@@ -1070,7 +1072,7 @@ mod serializaion_tests {
         //
 
         #[test]
-        fn test_aperture_attribute_profile() {
+        fn test_profile() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Profile,
             ));
@@ -1078,7 +1080,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_material() {
+        fn test_material() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Material,
             ));
@@ -1086,7 +1088,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_non_material() {
+        fn test_non_material() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::NonMaterial,
             ));
@@ -1094,7 +1096,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_other() {
+        fn test_other() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Other("CustomFunction".to_string()),
             ));
@@ -1106,7 +1108,7 @@ mod serializaion_tests {
         //
 
         #[test]
-        fn test_aperture_attribute_component_main() {
+        fn test_component_main() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ComponentMain,
             ));
@@ -1114,7 +1116,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_component_outline() {
+        fn test_component_outline() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ComponentOutline(None),
             ));
@@ -1141,7 +1143,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_component_pin() {
+        fn test_component_pin() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ComponentPin,
             ));
@@ -1153,14 +1155,14 @@ mod serializaion_tests {
         //
 
         #[test]
-        fn test_aperture_attribute_slot_deprecated() {
+        fn test_slot_deprecated() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Slot,
             ));
             assert_code!(function, "%TA.AperFunction,Slot*%\n");
         }
         #[test]
-        fn test_aperture_attribute_cutout_deprecated() {
+        fn test_cutout_deprecated() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::CutOut,
             ));
@@ -1168,7 +1170,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_cavity_deprecated() {
+        fn test_cavity_deprecated() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Cavity,
             ));
@@ -1176,7 +1178,7 @@ mod serializaion_tests {
         }
 
         #[test]
-        fn test_aperture_attribute_drawing_deprecated() {
+        fn test_drawing_deprecated() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::Drawing,
             ));
@@ -1187,22 +1189,22 @@ mod serializaion_tests {
             use super::*;
 
             #[test]
-            fn test_non_standard_serialize() {
+            fn test_non_standard() {
                 let function = ExtendedCode::ApertureAttribute(ApertureAttribute::UserDefined {
                     name: "NonStandardAttribute".to_string(),
                     values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
                 });
-                // NOTE there is no '.' prefix, spaced are not trimmed
+                // NOTE there is no '.' prefix, spaces are not trimmed
                 assert_code!(function, "%TANonStandardAttribute,Value 1 , Value 2*%\n");
             }
 
             #[test]
-            fn test_unsupported_standard_serialize() {
+            fn test_unsupported_standard() {
                 let function = ExtendedCode::ApertureAttribute(ApertureAttribute::UserDefined {
                     name: ".UnsupportedStandardAttribute".to_string(),
                     values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
                 });
-                // NOTE there *is* a '.' prefix, spaced are not trimmed
+                // NOTE there *is* a '.' prefix, spaces are not trimmed
                 assert_code!(
                     function,
                     "%TA.UnsupportedStandardAttribute,Value 1 , Value 2*%\n"
@@ -1215,7 +1217,7 @@ mod serializaion_tests {
         use super::*;
 
         #[test]
-        fn test_drill_tolerance_attribute_serialize() {
+        fn test_attribute() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::DrillTolerance {
                 plus: 1.0,
                 minus: 2.0,
@@ -1227,7 +1229,7 @@ mod serializaion_tests {
     mod flash_text {
         use super::*;
         #[test]
-        fn test_flash_text_attribute_serialize() {
+        fn test_attribute() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
                 text: "Test".to_string(),
                 mode: TextMode::Characters,
@@ -1257,26 +1259,134 @@ mod serializaion_tests {
     mod object_attribute {
         use super::*;
 
+        mod component_characteristics {
+            use super::*;
+
+            macro_rules! test_string {
+                ($test:ident, $cc:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let string = "A String".to_string();
+                        let func = ExtendedCode::ObjectAttribute(
+                            ObjectAttribute::ComponentCharacteristics(
+                                ComponentCharacteristics::$cc(string.clone()),
+                            ),
+                        );
+                        assert_code!(func, &format!("%TO.{},{}*%\n", $value, string));
+                    }
+                };
+            }
+
+            macro_rules! test_decimal {
+                ($test:ident, $cc:ident, $value:literal) => {
+                    #[test]
+                    fn $test() {
+                        let decimal = 100.00;
+                        let func = ExtendedCode::ObjectAttribute(
+                            ObjectAttribute::ComponentCharacteristics(
+                                ComponentCharacteristics::$cc(decimal),
+                            ),
+                        );
+                        assert_code!(func, &format!("%TO.{},{}*%\n", $value, decimal));
+                    }
+                };
+            }
+
+            test_decimal!(test_rotation, Rotation, "CRot");
+            test_string!(test_manufacturer, Manufacturer, "CMfr");
+            test_string!(test_mpn, MPN, "CMPN");
+            test_string!(test_val, Value, "CVal");
+
+            mod mount_type {
+                use super::*;
+
+                #[test]
+                fn test_through_hole() {
+                    let function =
+                        ExtendedCode::ObjectAttribute(ObjectAttribute::ComponentCharacteristics(
+                            ComponentCharacteristics::Mount(ComponentMounting::ThroughHole),
+                        ));
+                    assert_code!(function, "%TO.CMnt,TH*%\n");
+                }
+
+                #[test]
+                fn test_smd() {
+                    let function =
+                        ExtendedCode::ObjectAttribute(ObjectAttribute::ComponentCharacteristics(
+                            ComponentCharacteristics::Mount(ComponentMounting::SMD),
+                        ));
+                    assert_code!(function, "%TO.CMnt,SMD*%\n");
+                }
+
+                #[test]
+                fn test_press_fit() {
+                    let function =
+                        ExtendedCode::ObjectAttribute(ObjectAttribute::ComponentCharacteristics(
+                            ComponentCharacteristics::Mount(ComponentMounting::PressFit),
+                        ));
+                    assert_code!(function, "%TO.CMnt,Pressfit*%\n");
+                }
+
+                #[test]
+                fn test_press_other() {
+                    let function =
+                        ExtendedCode::ObjectAttribute(ObjectAttribute::ComponentCharacteristics(
+                            ComponentCharacteristics::Mount(ComponentMounting::Other),
+                        ));
+                    assert_code!(function, "%TO.CMnt,Other*%\n");
+                }
+            }
+
+            test_string!(test_footprint, Footprint, "CFtp");
+            test_string!(test_packagename, PackageName, "CPgN");
+            test_string!(test_packagedescription, PackageDescription, "CPgD");
+            test_decimal!(test_height, Height, "CHgt");
+            test_string!(test_libraryname, LibraryName, "CLbN");
+            test_string!(test_librarydescription, LibraryDescription, "CLbD");
+
+            #[test]
+            fn test_supplier() {
+                let function =
+                    ExtendedCode::ObjectAttribute(ObjectAttribute::ComponentCharacteristics(
+                        ComponentCharacteristics::Supplier(vec![
+                            SupplierPart {
+                                supplier_name: "Supplier Name 1".to_string(),
+                                supplier_part_reference: "Reference 1".to_string(),
+                            },
+                            SupplierPart {
+                                supplier_name: " Supplier Name 2 ".to_string(),
+                                supplier_part_reference: "Reference 2".to_string(),
+                            },
+                        ]),
+                    ));
+                // NOTE spaces are not trimmed
+                assert_code!(
+                    function,
+                    "%TO.CSup,Supplier Name 1,Reference 1, Supplier Name 2 ,Reference 2*%\n"
+                );
+            }
+        }
+
         mod user_defined_attribute {
             use super::*;
 
             #[test]
-            fn test_non_standard_serialize() {
+            fn test_non_standard() {
                 let function = ExtendedCode::ObjectAttribute(ObjectAttribute::UserDefined {
                     name: "NonStandardAttribute".to_string(),
                     values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
                 });
-                // NOTE there is no '.' prefix, spaced are not trimmed
+                // NOTE there is no '.' prefix, spaces are not trimmed
                 assert_code!(function, "%TONonStandardAttribute,Value 1 , Value 2*%\n");
             }
 
             #[test]
-            fn test_unsupported_standard_serialize() {
+            fn test_unsupported_standard() {
                 let function = ExtendedCode::ObjectAttribute(ObjectAttribute::UserDefined {
                     name: ".UnsupportedStandardAttribute".to_string(),
                     values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
                 });
-                // NOTE there *is* a '.' prefix, spaced are not trimmed
+                // NOTE there *is* a '.' prefix, spaces are not trimmed
                 assert_code!(
                     function,
                     "%TO.UnsupportedStandardAttribute,Value 1 , Value 2*%\n"
