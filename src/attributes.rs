@@ -291,7 +291,6 @@ pub enum ApertureAttribute {
         plus: f64,
         minus: f64,
     },
-    CustomAttribute(String, Option<String>),
     FlashText {
         text: String,
         mode: TextMode,
@@ -299,6 +298,10 @@ pub enum ApertureAttribute {
         font: Option<String>,
         size: Option<i32>,
         comment: Option<String>,
+    },
+    UserDefined {
+        name: String,
+        values: Vec<String>,
     },
 }
 
@@ -483,9 +486,9 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                     write!(writer, "{}", comment)?;
                 }
             }
-            ApertureAttribute::CustomAttribute(name, value) => {
+            ApertureAttribute::UserDefined { name, values } => {
                 write!(writer, "{}", name)?;
-                if let Some(value) = value {
+                for value in values {
                     write!(writer, ",{}", value)?;
                 }
             }

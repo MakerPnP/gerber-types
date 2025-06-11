@@ -1226,4 +1226,31 @@ mod serializaion_tests {
             assert_code!(function, "%TA.FlashText,Test,B,M,,,*%\n");
         }
     }
+
+    mod user_defined_attribute {
+        use super::*;
+
+        #[test]
+        fn test_non_standard_serialize() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::UserDefined {
+                name: "NonStandardAttribute".to_string(),
+                values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
+            });
+            // NOTE there is no '.' prefix, spaced are not trimmed
+            assert_code!(function, "%TANonStandardAttribute,Value 1 , Value 2*%\n");
+        }
+
+        #[test]
+        fn test_unsupported_standard_serialize() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::UserDefined {
+                name: ".UnsupportedStandardAttribute".to_string(),
+                values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
+            });
+            // NOTE there *is* a '.' prefix, spaced are not trimmed
+            assert_code!(
+                function,
+                "%TA.UnsupportedStandardAttribute,Value 1 , Value 2*%\n"
+            );
+        }
+    }
 }
