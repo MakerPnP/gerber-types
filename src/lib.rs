@@ -621,876 +621,609 @@ mod serializaion_tests {
         };
     }
 
-    //
-    // It should be noted that the gerber spec is very-inconsistent with casing, e.g. "Soldermask" vs "AssemblyDrawing"
-    //
-
-    test_position_and_index!(
-        test_file_attribute_file_function_soldermask,
-        SolderMask,
-        "Soldermask"
-    );
-    test_position_and_index!(test_file_attribute_file_function_legend, Legend, "Legend");
-    test_layer_and_position!(
-        test_file_attribute_file_function_component,
-        Component,
-        "Component"
-    );
-    test_position!(test_file_attribute_file_function_paste, Paste, "Paste");
-    test_position!(test_file_attribute_file_function_glue, Glue, "Glue");
-    test_position_and_index!(
-        test_file_attribute_file_function_carbonmask,
-        CarbonMask,
-        "Carbonmask"
-    );
-    test_position_and_index!(
-        test_file_attribute_file_function_goldmask,
-        GoldMask,
-        "Goldmask"
-    );
-    test_position_and_index!(
-        test_file_attribute_file_function_heatsinkmask,
-        HeatsinkMask,
-        "Heatsinkmask"
-    );
-    test_position_and_index!(
-        test_file_attribute_file_function_peelablemask,
-        PeelableMask,
-        "Peelablemask"
-    );
-    test_position_and_index!(
-        test_file_attribute_file_function_silvermask,
-        SilverMask,
-        "Silvermask"
-    );
-    test_position_and_index!(
-        test_file_attribute_file_function_tinmask,
-        TinMask,
-        "Tinmask"
-    );
-    test_position!(
-        test_file_attribute_file_function_depthroute,
-        DepthRoute,
-        "Depthrout"
-    );
-    test_optional_position!(test_file_attribute_file_function_vcut, VCut, "Vcut");
-    test_simple!(
-        test_file_attribute_file_function_viafill,
-        ViaFill,
-        "Viafill"
-    );
-    test_position!(test_file_attribute_file_function_pads, Pads, "Pads");
-    test_string!(test_file_attribute_file_function_other, Other, "Other");
-    test_simple!(
-        test_file_attribute_file_function_drillmap,
-        DrillMap,
-        "Drillmap"
-    );
-    test_simple!(
-        test_file_attribute_file_function_fabricationdrawing,
-        FabricationDrawing,
-        "FabricationDrawing"
-    );
-    test_simple!(
-        test_file_attribute_file_function_vcutmap,
-        VCutMap,
-        "Vcutmap"
-    );
-    test_position!(
-        test_file_attribute_file_function_assemblydrawing,
-        AssemblyDrawing,
-        "AssemblyDrawing"
-    );
-    test_simple!(
-        test_file_attribute_file_function_arraydrawing,
-        ArrayDrawing,
-        "ArrayDrawing"
-    );
-    test_string!(
-        test_file_attribute_file_function_otherdrawing,
-        OtherDrawing,
-        "OtherDrawing"
-    );
-
-    #[test]
-    fn test_file_attribute_file_polarity() {
-        let pol = ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Positive));
-        assert_code!(pol, "%TF.FilePolarity,Positive*%\n");
-
-        let pol = ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Negative));
-        assert_code!(pol, "%TF.FilePolarity,Negative*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_md5() {
-        let md5 = ExtendedCode::FileAttribute(FileAttribute::Md5("abcd1234".into()));
-        assert_code!(md5, "%TF.MD5,abcd1234*%\n");
-    }
-
-    #[test]
-    fn test_file_attribute_file_function_user_defined() {
-        let owner = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
-            name: "Authors".to_string(),
-            values: vec!["Author 1".to_string(), "Author 2".to_string()],
-        });
-        assert_code!(owner, "%TF.Authors,Author 1,Author 2*%\n");
-    }
-
-    #[test]
-    fn test_aperture_attribute() {
-        // Test with Profile (found in "All data layers" section of the enum)
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Profile,
-        ));
-        assert_code!(function, "%TA.AperFunction,Profile*%\n");
-
-        // "Drill and rout layers"
-        // ViaDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(None),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::None)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,None*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::Ia)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,Ia*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::Ib)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,Ib*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIa)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIa*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIb)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIb*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIIa)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIIa*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIIb)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIIb*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IVa)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IVa*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IVb)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IVb*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::V)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,V*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::VI)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,VI*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::VII)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,VII*%\n");
-
-        // BackDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::BackDrill,
-        ));
-        assert_code!(function, "%TA.AperFunction,BackDrill*%\n");
-
-        // ComponentDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentDrill { press_fit: None },
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentDrill {
-                press_fit: Some(true),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentDrill,PressFit*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentDrill {
-                press_fit: Some(false),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
-
-        // MechanicalDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill { function: None },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill {
-                function: Some(DrillFunction::Other),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill,Other*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill {
-                function: Some(DrillFunction::BreakOut),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill,BreakOut*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill {
-                function: Some(DrillFunction::Tooling),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill,Tooling*%\n");
-
-        // CastellatedDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CastellatedDrill,
-        ));
-        assert_code!(function, "%TA.AperFunction,CastellatedDrill*%\n");
-
-        // OtherDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::OtherDrill("CustomDrill".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,OtherDrill,CustomDrill*%\n");
-
-        // "Copper layers"
-        // ComponentPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentPad*%\n");
-
-        // SmdPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::SmdPad(SmdPadType::CopperDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,SMDPad,CuDef*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::SmdPad(SmdPadType::SoldermaskDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,SMDPad,SMDef*%\n");
-
-        // BgaPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::BgaPad(SmdPadType::CopperDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,BGAPad,CuDef*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::BgaPad(SmdPadType::SoldermaskDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,BGAPad,SMDef*%\n");
-
-        // ConnectorPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ConnectorPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ConnectorPad*%\n");
-
-        // HeatsinkPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::HeatsinkPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,HeatsinkPad*%\n");
-
-        // ViaPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaPad*%\n");
-
-        // TestPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::TestPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,TestPad*%\n");
-
-        // CastellatedPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CastellatedPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,CastellatedPad*%\n");
-
-        // FiducialPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::FiducialPad(FiducialScope::Global),
-        ));
-        assert_code!(function, "%TA.AperFunction,FiducialPad,Global*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::FiducialPad(FiducialScope::Local),
-        ));
-        assert_code!(function, "%TA.AperFunction,FiducialPad,Local*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::FiducialPad(FiducialScope::Panel),
-        ));
-        assert_code!(function, "%TA.AperFunction,FiducialPad,Panel*%\n");
-
-        // ThermalReliefPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ThermalReliefPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ThermalReliefPad*%\n");
-
-        // WasherPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::WasherPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,WasherPad*%\n");
-
-        // AntiPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::AntiPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,AntiPad*%\n");
-
-        // OtherPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::OtherPad("CustomPad".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,OtherPad,CustomPad*%\n");
-
-        // Conductor
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Conductor,
-        ));
-        assert_code!(function, "%TA.AperFunction,Conductor*%\n");
-
-        // EtchedComponent
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::EtchedComponent,
-        ));
-        assert_code!(function, "%TA.AperFunction,EtchedComponent*%\n");
-
-        // NonConductor
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::NonConductor,
-        ));
-        assert_code!(function, "%TA.AperFunction,NonConductor*%\n");
-
-        // CopperBalancing
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CopperBalancing,
-        ));
-        assert_code!(function, "%TA.AperFunction,CopperBalancing*%\n");
-
-        // Border
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Border,
-        ));
-        assert_code!(function, "%TA.AperFunction,Border*%\n");
-
-        // OtherCopper
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::OtherCopper("CustomCopper".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,OtherCopper,CustomCopper*%\n");
-
-        // "All data layers"
-        // Profile - already tested at the beginning
-
-        // Material
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Material,
-        ));
-        assert_code!(function, "%TA.AperFunction,Material*%\n");
-
-        // NonMaterial
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::NonMaterial,
-        ));
-        assert_code!(function, "%TA.AperFunction,NonMaterial*%\n");
-
-        // Other
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Other("CustomFunction".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,Other,CustomFunction*%\n");
-
-        // "Component layers"
-        // ComponentMain
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentMain,
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentMain*%\n");
-
-        // ComponentOutline
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(None),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Body)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Body*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Lead2Lead)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Lead2Lead*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Footprint)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Footprint*%\n");
-
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Courtyard)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Courtyard*%\n");
-
-        // ComponentPin
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentPin,
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentPin*%\n");
-
-        // "2024.05 - 8.4 - Deprecated attribute values"
-        // Slot
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Slot,
-        ));
-        assert_code!(function, "%TA.AperFunction,Slot*%\n");
-
-        // CutOut
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CutOut,
-        ));
-        assert_code!(function, "%TA.AperFunction,CutOut*%\n");
-
-        // Cavity
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Cavity,
-        ));
-        assert_code!(function, "%TA.AperFunction,Cavity*%\n");
-
-        // Drawing
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Drawing,
-        ));
-        assert_code!(function, "%TA.AperFunction,Drawing*%\n");
-    }
-
-    #[test]
-    fn test_drill_tolerance_attribute_serialize() {
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::DrillTolerance {
-            plus: 1.0,
-            minus: 2.0,
-        });
-        assert_code!(function, "%TA.DrillTolerance,1,2*%\n");
-    }
-
-    #[test]
-    fn test_flash_text_attribute_serialize() {
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
-            text: "Test".to_string(),
-            mode: TextMode::Characters,
-            mirroring: Some(TextMirroring::Readable),
-            font: Some("Font Name".to_string()),
-            size: Some(10),
-            comment: Some("A Comment".to_string()),
-        });
-        assert_code!(
-            function,
-            "%TA.FlashText,Test,C,R,Font Name,10,A Comment*%\n"
+    mod file_attribute {
+        use super::*;
+        //
+        // It should be noted that the gerber spec is very-inconsistent with casing, e.g. "Soldermask" vs "AssemblyDrawing"
+        //
+
+        test_position_and_index!(
+            test_file_attribute_file_function_soldermask,
+            SolderMask,
+            "Soldermask"
+        );
+        test_position_and_index!(test_file_attribute_file_function_legend, Legend, "Legend");
+        test_layer_and_position!(
+            test_file_attribute_file_function_component,
+            Component,
+            "Component"
+        );
+        test_position!(test_file_attribute_file_function_paste, Paste, "Paste");
+        test_position!(test_file_attribute_file_function_glue, Glue, "Glue");
+        test_position_and_index!(
+            test_file_attribute_file_function_carbonmask,
+            CarbonMask,
+            "Carbonmask"
+        );
+        test_position_and_index!(
+            test_file_attribute_file_function_goldmask,
+            GoldMask,
+            "Goldmask"
+        );
+        test_position_and_index!(
+            test_file_attribute_file_function_heatsinkmask,
+            HeatsinkMask,
+            "Heatsinkmask"
+        );
+        test_position_and_index!(
+            test_file_attribute_file_function_peelablemask,
+            PeelableMask,
+            "Peelablemask"
+        );
+        test_position_and_index!(
+            test_file_attribute_file_function_silvermask,
+            SilverMask,
+            "Silvermask"
+        );
+        test_position_and_index!(
+            test_file_attribute_file_function_tinmask,
+            TinMask,
+            "Tinmask"
+        );
+        test_position!(
+            test_file_attribute_file_function_depthroute,
+            DepthRoute,
+            "Depthrout"
+        );
+        test_optional_position!(test_file_attribute_file_function_vcut, VCut, "Vcut");
+        test_simple!(
+            test_file_attribute_file_function_viafill,
+            ViaFill,
+            "Viafill"
+        );
+        test_position!(test_file_attribute_file_function_pads, Pads, "Pads");
+        test_string!(test_file_attribute_file_function_other, Other, "Other");
+        test_simple!(
+            test_file_attribute_file_function_drillmap,
+            DrillMap,
+            "Drillmap"
+        );
+        test_simple!(
+            test_file_attribute_file_function_fabricationdrawing,
+            FabricationDrawing,
+            "FabricationDrawing"
+        );
+        test_simple!(
+            test_file_attribute_file_function_vcutmap,
+            VCutMap,
+            "Vcutmap"
+        );
+        test_position!(
+            test_file_attribute_file_function_assemblydrawing,
+            AssemblyDrawing,
+            "AssemblyDrawing"
+        );
+        test_simple!(
+            test_file_attribute_file_function_arraydrawing,
+            ArrayDrawing,
+            "ArrayDrawing"
+        );
+        test_string!(
+            test_file_attribute_file_function_otherdrawing,
+            OtherDrawing,
+            "OtherDrawing"
         );
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
-            text: "Test".to_string(),
-            mode: TextMode::BarCode,
-            mirroring: Some(TextMirroring::Mirrored),
-            font: None,
-            size: None,
-            comment: None,
-        });
-        // 2024.05 - 5.6.12 .FlashText - "An empty field means that the corresponding meta-data is not specified."
-        assert_code!(function, "%TA.FlashText,Test,B,M,,,*%\n");
+        #[test]
+        fn test_file_attribute_file_polarity() {
+            let pol =
+                ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Positive));
+            assert_code!(pol, "%TF.FilePolarity,Positive*%\n");
+
+            let pol =
+                ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Negative));
+            assert_code!(pol, "%TF.FilePolarity,Negative*%\n");
+        }
+
+        #[test]
+        fn test_file_attribute_file_function_md5() {
+            let md5 = ExtendedCode::FileAttribute(FileAttribute::Md5("abcd1234".into()));
+            assert_code!(md5, "%TF.MD5,abcd1234*%\n");
+        }
+
+        #[test]
+        fn test_file_attribute_file_function_user_defined() {
+            let owner = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
+                name: "Authors".to_string(),
+                values: vec!["Author 1".to_string(), "Author 2".to_string()],
+            });
+            assert_code!(owner, "%TF.Authors,Author 1,Author 2*%\n");
+        }
     }
 
-    #[test]
-    fn test_aperture_attribute_serialize() {
-        // Test with Profile (found in "All data layers" section of the enum)
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Profile,
-        ));
-        assert_code!(function, "%TA.AperFunction,Profile*%\n");
-
+    mod aperture_attribute {
+        use super::*;
+        //
         // "Drill and rout layers"
-        // ViaDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(None),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill*%\n");
+        //
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::None)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,None*%\n");
+        #[test]
+        fn test_aperture_attribute_via_drill() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(None),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::Ia)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,Ia*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::None)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,None*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::Ib)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,Ib*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::Ia)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,Ia*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIa)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIa*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::Ib)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,Ib*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIb)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIb*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIa)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,IIa*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIIa)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIIa*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIb)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,IIb*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIIb)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IIIb*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIIa)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,IIIa*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IVa)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IVa*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IIIb)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,IIIb*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IVb)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,IVb*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IVa)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,IVa*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::V)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,V*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::IVb)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,IVb*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::VI)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,VI*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::V)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,V*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::VII)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaDrill,VII*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::VI)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,VI*%\n");
 
-        // BackDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::BackDrill,
-        ));
-        assert_code!(function, "%TA.AperFunction,BackDrill*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaDrill(Some(IPC4761ViaProtection::VII)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaDrill,VII*%\n");
+        }
 
-        // ComponentDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentDrill { press_fit: None },
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
+        #[test]
+        fn test_aperture_attribute_backdrill() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::BackDrill,
+            ));
+            assert_code!(function, "%TA.AperFunction,BackDrill*%\n");
+        }
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentDrill {
-                press_fit: Some(true),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentDrill,PressFit*%\n");
+        #[test]
+        fn test_aperture_attribute_component_drill() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentDrill { press_fit: None },
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentDrill {
-                press_fit: Some(false),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentDrill {
+                    press_fit: Some(true),
+                },
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentDrill,PressFit*%\n");
 
-        // MechanicalDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill { function: None },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentDrill {
+                    press_fit: Some(false),
+                },
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
+        }
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill {
-                function: Some(DrillFunction::Other),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill,Other*%\n");
+        #[test]
+        fn test_aperture_mechanical_drill() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::MechanicalDrill { function: None },
+            ));
+            assert_code!(function, "%TA.AperFunction,MechanicalDrill*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill {
-                function: Some(DrillFunction::BreakOut),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill,BreakOut*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::MechanicalDrill {
+                    function: Some(DrillFunction::Other),
+                },
+            ));
+            assert_code!(function, "%TA.AperFunction,MechanicalDrill,Other*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::MechanicalDrill {
-                function: Some(DrillFunction::Tooling),
-            },
-        ));
-        assert_code!(function, "%TA.AperFunction,MechanicalDrill,Tooling*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::MechanicalDrill {
+                    function: Some(DrillFunction::BreakOut),
+                },
+            ));
+            assert_code!(function, "%TA.AperFunction,MechanicalDrill,BreakOut*%\n");
 
-        // CastellatedDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CastellatedDrill,
-        ));
-        assert_code!(function, "%TA.AperFunction,CastellatedDrill*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::MechanicalDrill {
+                    function: Some(DrillFunction::Tooling),
+                },
+            ));
+            assert_code!(function, "%TA.AperFunction,MechanicalDrill,Tooling*%\n");
+        }
 
-        // OtherDrill
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::OtherDrill("CustomDrill".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,OtherDrill,CustomDrill*%\n");
+        #[test]
+        fn test_aperture_attribute_catellated_drill() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::CastellatedDrill,
+            ));
+            assert_code!(function, "%TA.AperFunction,CastellatedDrill*%\n");
+        }
 
+        #[test]
+        fn test_aperture_attribute_other_drill() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::OtherDrill("CustomDrill".to_string()),
+            ));
+            assert_code!(function, "%TA.AperFunction,OtherDrill,CustomDrill*%\n");
+        }
+
+        //
         // "Copper layers"
-        // ComponentPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentPad*%\n");
+        //
+        #[test]
+        fn test_aperture_attribute_component_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentPad*%\n");
+        }
 
-        // SmdPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::SmdPad(SmdPadType::CopperDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,SMDPad,CuDef*%\n");
+        #[test]
+        fn test_aperture_attribute_smd_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::SmdPad(SmdPadType::CopperDefined),
+            ));
+            assert_code!(function, "%TA.AperFunction,SMDPad,CuDef*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::SmdPad(SmdPadType::SoldermaskDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,SMDPad,SMDef*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::SmdPad(SmdPadType::SoldermaskDefined),
+            ));
+            assert_code!(function, "%TA.AperFunction,SMDPad,SMDef*%\n");
+        }
 
-        // BgaPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::BgaPad(SmdPadType::CopperDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,BGAPad,CuDef*%\n");
+        #[test]
+        fn test_aperture_attribute_bga_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::BgaPad(SmdPadType::CopperDefined),
+            ));
+            assert_code!(function, "%TA.AperFunction,BGAPad,CuDef*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::BgaPad(SmdPadType::SoldermaskDefined),
-        ));
-        assert_code!(function, "%TA.AperFunction,BGAPad,SMDef*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::BgaPad(SmdPadType::SoldermaskDefined),
+            ));
+            assert_code!(function, "%TA.AperFunction,BGAPad,SMDef*%\n");
+        }
 
-        // ConnectorPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ConnectorPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ConnectorPad*%\n");
+        #[test]
+        fn test_aperture_connector_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ConnectorPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,ConnectorPad*%\n");
+        }
 
-        // HeatsinkPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::HeatsinkPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,HeatsinkPad*%\n");
+        #[test]
+        fn test_aperture_attribute_headsink_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::HeatsinkPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,HeatsinkPad*%\n");
+        }
 
-        // ViaPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ViaPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ViaPad*%\n");
+        #[test]
+        fn test_aperture_attribute_via_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ViaPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,ViaPad*%\n");
+        }
 
-        // TestPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::TestPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,TestPad*%\n");
+        #[test]
+        fn test_aperture_attribute_test_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::TestPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,TestPad*%\n");
+        }
 
-        // CastellatedPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CastellatedPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,CastellatedPad*%\n");
+        #[test]
+        fn test_aperture_attribute_castellated_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::CastellatedPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,CastellatedPad*%\n");
+        }
 
-        // FiducialPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::FiducialPad(FiducialScope::Global),
-        ));
-        assert_code!(function, "%TA.AperFunction,FiducialPad,Global*%\n");
+        #[test]
+        fn test_aperture_attribute_fiducial_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::FiducialPad(FiducialScope::Global),
+            ));
+            assert_code!(function, "%TA.AperFunction,FiducialPad,Global*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::FiducialPad(FiducialScope::Local),
-        ));
-        assert_code!(function, "%TA.AperFunction,FiducialPad,Local*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::FiducialPad(FiducialScope::Local),
+            ));
+            assert_code!(function, "%TA.AperFunction,FiducialPad,Local*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::FiducialPad(FiducialScope::Panel),
-        ));
-        assert_code!(function, "%TA.AperFunction,FiducialPad,Panel*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::FiducialPad(FiducialScope::Panel),
+            ));
+            assert_code!(function, "%TA.AperFunction,FiducialPad,Panel*%\n");
+        }
 
-        // ThermalReliefPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ThermalReliefPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,ThermalReliefPad*%\n");
+        #[test]
+        fn test_aperture_attribute_thermal_relief_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ThermalReliefPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,ThermalReliefPad*%\n");
+        }
 
-        // WasherPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::WasherPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,WasherPad*%\n");
+        #[test]
+        fn test_aperture_attribute_washer_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::WasherPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,WasherPad*%\n");
+        }
 
-        // AntiPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::AntiPad,
-        ));
-        assert_code!(function, "%TA.AperFunction,AntiPad*%\n");
+        #[test]
+        fn test_aperture_attribute_anti_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::AntiPad,
+            ));
+            assert_code!(function, "%TA.AperFunction,AntiPad*%\n");
+        }
 
-        // OtherPad
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::OtherPad("CustomPad".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,OtherPad,CustomPad*%\n");
+        #[test]
+        fn test_aperture_attribute_other_pad() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::OtherPad("CustomPad".to_string()),
+            ));
+            assert_code!(function, "%TA.AperFunction,OtherPad,CustomPad*%\n");
+        }
 
-        // Conductor
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Conductor,
-        ));
-        assert_code!(function, "%TA.AperFunction,Conductor*%\n");
+        #[test]
+        fn test_aperture_attribute_conductor() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Conductor,
+            ));
+            assert_code!(function, "%TA.AperFunction,Conductor*%\n");
+        }
 
-        // EtchedComponent
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::EtchedComponent,
-        ));
-        assert_code!(function, "%TA.AperFunction,EtchedComponent*%\n");
+        #[test]
+        fn test_aperture_attribute_etched_component() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::EtchedComponent,
+            ));
+            assert_code!(function, "%TA.AperFunction,EtchedComponent*%\n");
+        }
 
-        // NonConductor
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::NonConductor,
-        ));
-        assert_code!(function, "%TA.AperFunction,NonConductor*%\n");
+        #[test]
+        fn test_aperture_attribute_non_conductor() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::NonConductor,
+            ));
+            assert_code!(function, "%TA.AperFunction,NonConductor*%\n");
+        }
 
-        // CopperBalancing
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CopperBalancing,
-        ));
-        assert_code!(function, "%TA.AperFunction,CopperBalancing*%\n");
+        #[test]
+        fn test_aperture_attribute_copper_balancing() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::CopperBalancing,
+            ));
+            assert_code!(function, "%TA.AperFunction,CopperBalancing*%\n");
+        }
 
-        // Border
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Border,
-        ));
-        assert_code!(function, "%TA.AperFunction,Border*%\n");
+        #[test]
+        fn test_aperture_attribute_border() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Border,
+            ));
+            assert_code!(function, "%TA.AperFunction,Border*%\n");
+        }
 
-        // OtherCopper
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::OtherCopper("CustomCopper".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,OtherCopper,CustomCopper*%\n");
+        #[test]
+        fn test_aperture_attribute_other_copper() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::OtherCopper("CustomCopper".to_string()),
+            ));
+            assert_code!(function, "%TA.AperFunction,OtherCopper,CustomCopper*%\n");
+        }
 
+        //
         // "All data layers"
-        // Profile - already tested at the beginning
+        //
 
-        // Material
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Material,
-        ));
-        assert_code!(function, "%TA.AperFunction,Material*%\n");
+        #[test]
+        fn test_aperture_attribute_profile() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Profile,
+            ));
+            assert_code!(function, "%TA.AperFunction,Profile*%\n");
+        }
 
-        // NonMaterial
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::NonMaterial,
-        ));
-        assert_code!(function, "%TA.AperFunction,NonMaterial*%\n");
+        #[test]
+        fn test_aperture_attribute_material() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Material,
+            ));
+            assert_code!(function, "%TA.AperFunction,Material*%\n");
+        }
 
-        // Other
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Other("CustomFunction".to_string()),
-        ));
-        assert_code!(function, "%TA.AperFunction,Other,CustomFunction*%\n");
+        #[test]
+        fn test_aperture_attribute_non_material() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::NonMaterial,
+            ));
+            assert_code!(function, "%TA.AperFunction,NonMaterial*%\n");
+        }
 
+        #[test]
+        fn test_aperture_attribute_other() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Other("CustomFunction".to_string()),
+            ));
+            assert_code!(function, "%TA.AperFunction,Other,CustomFunction*%\n");
+        }
+
+        //
         // "Component layers"
-        // ComponentMain
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentMain,
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentMain*%\n");
+        //
 
-        // ComponentOutline
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(None),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline*%\n");
+        #[test]
+        fn test_aperture_attribute_component_main() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentMain,
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentMain*%\n");
+        }
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Body)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Body*%\n");
+        #[test]
+        fn test_aperture_attribute_component_outline() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentOutline(None),
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentOutline*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentOutline(Some(ComponentOutline::Body)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentOutline,Body*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Lead2Lead)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Lead2Lead*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentOutline(Some(ComponentOutline::Lead2Lead)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentOutline,Lead2Lead*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Footprint)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Footprint*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentOutline(Some(ComponentOutline::Footprint)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentOutline,Footprint*%\n");
 
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentOutline(Some(ComponentOutline::Courtyard)),
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentOutline,Courtyard*%\n");
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentOutline(Some(ComponentOutline::Courtyard)),
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentOutline,Courtyard*%\n");
+        }
 
-        // ComponentPin
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::ComponentPin,
-        ));
-        assert_code!(function, "%TA.AperFunction,ComponentPin*%\n");
+        #[test]
+        fn test_aperture_attribute_component_pin() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::ComponentPin,
+            ));
+            assert_code!(function, "%TA.AperFunction,ComponentPin*%\n");
+        }
 
+        //
         // "2024.05 - 8.4 - Deprecated attribute values"
-        // Slot
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Slot,
-        ));
-        assert_code!(function, "%TA.AperFunction,Slot*%\n");
+        //
 
-        // CutOut
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::CutOut,
-        ));
-        assert_code!(function, "%TA.AperFunction,CutOut*%\n");
+        #[test]
+        fn test_aperture_attribute_slot_deprecated() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Slot,
+            ));
+            assert_code!(function, "%TA.AperFunction,Slot*%\n");
+        }
+        #[test]
+        fn test_aperture_attribute_cutout_deprecated() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::CutOut,
+            ));
+            assert_code!(function, "%TA.AperFunction,CutOut*%\n");
+        }
 
-        // Cavity
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Cavity,
-        ));
-        assert_code!(function, "%TA.AperFunction,Cavity*%\n");
+        #[test]
+        fn test_aperture_attribute_cavity_deprecated() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Cavity,
+            ));
+            assert_code!(function, "%TA.AperFunction,Cavity*%\n");
+        }
 
-        // Drawing
-        let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-            ApertureFunction::Drawing,
-        ));
-        assert_code!(function, "%TA.AperFunction,Drawing*%\n");
+        #[test]
+        fn test_aperture_attribute_drawing_deprecated() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::Drawing,
+            ));
+            assert_code!(function, "%TA.AperFunction,Drawing*%\n");
+        }
+    }
+
+    mod drill_tolerance {
+        use super::*;
+
+        #[test]
+        fn test_drill_tolerance_attribute_serialize() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::DrillTolerance {
+                plus: 1.0,
+                minus: 2.0,
+            });
+            assert_code!(function, "%TA.DrillTolerance,1,2*%\n");
+        }
+    }
+
+    mod flash_text {
+        use super::*;
+        #[test]
+        fn test_flash_text_attribute_serialize() {
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
+                text: "Test".to_string(),
+                mode: TextMode::Characters,
+                mirroring: Some(TextMirroring::Readable),
+                font: Some("Font Name".to_string()),
+                size: Some(10),
+                comment: Some("A Comment".to_string()),
+            });
+            assert_code!(
+                function,
+                "%TA.FlashText,Test,C,R,Font Name,10,A Comment*%\n"
+            );
+
+            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::FlashText {
+                text: "Test".to_string(),
+                mode: TextMode::BarCode,
+                mirroring: Some(TextMirroring::Mirrored),
+                font: None,
+                size: None,
+                comment: None,
+            });
+            // 2024.05 - 5.6.12 .FlashText - "An empty field means that the corresponding meta-data is not specified."
+            assert_code!(function, "%TA.FlashText,Test,B,M,,,*%\n");
+        }
     }
 }
