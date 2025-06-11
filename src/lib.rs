@@ -694,51 +694,69 @@ mod serialization_tests {
             test_position!(test_assemblydrawing, AssemblyDrawing, "AssemblyDrawing");
             test_simple!(test_arraydrawing, ArrayDrawing, "ArrayDrawing");
             test_string!(test_otherdrawing, OtherDrawing, "OtherDrawing");
+        }
+
+        #[test]
+        fn test_polarity() {
+            let pol =
+                ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Positive));
+            assert_code!(pol, "%TF.FilePolarity,Positive*%\n");
+
+            let pol =
+                ExtendedCode::FileAttribute(FileAttribute::FilePolarity(FilePolarity::Negative));
+            assert_code!(pol, "%TF.FilePolarity,Negative*%\n");
+        }
+
+        #[test]
+        fn test_same_coordinates() {
+            let same_coordiantes =
+                ExtendedCode::FileAttribute(FileAttribute::SameCoordinates(None));
+            assert_code!(same_coordiantes, "%TF.SameCoordinates*%\n");
+
+            let same_coordiantes = ExtendedCode::FileAttribute(FileAttribute::SameCoordinates(
+                Some(Ident::Name("Name 1".to_string())),
+            ));
+            assert_code!(same_coordiantes, "%TF.SameCoordinates,Name 1*%\n");
+
+            let same_coordiantes = ExtendedCode::FileAttribute(FileAttribute::SameCoordinates(
+                Some(Ident::Uuid(Uuid::max())),
+            ));
+            assert_code!(
+                same_coordiantes,
+                "%TF.SameCoordinates,ffffffff-ffff-ffff-ffff-ffffffffffff*%\n"
+            );
+        }
+
+        #[test]
+        fn test_md5() {
+            let md5 = ExtendedCode::FileAttribute(FileAttribute::Md5("abcd1234".into()));
+            assert_code!(md5, "%TF.MD5,abcd1234*%\n");
+        }
+
+        mod user_defined_attribute {
+            use super::*;
 
             #[test]
-            fn test_polarity() {
-                let pol = ExtendedCode::FileAttribute(FileAttribute::FilePolarity(
-                    FilePolarity::Positive,
-                ));
-                assert_code!(pol, "%TF.FilePolarity,Positive*%\n");
-
-                let pol = ExtendedCode::FileAttribute(FileAttribute::FilePolarity(
-                    FilePolarity::Negative,
-                ));
-                assert_code!(pol, "%TF.FilePolarity,Negative*%\n");
+            fn test_non_standard() {
+                let function = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
+                    name: "NonStandardAttribute".to_string(),
+                    values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
+                });
+                // NOTE there is no '.' prefix, spaces are not trimmed
+                assert_code!(function, "%TFNonStandardAttribute,Value 1 , Value 2*%\n");
             }
 
             #[test]
-            fn test_md5() {
-                let md5 = ExtendedCode::FileAttribute(FileAttribute::Md5("abcd1234".into()));
-                assert_code!(md5, "%TF.MD5,abcd1234*%\n");
-            }
-
-            mod user_defined_attribute {
-                use super::*;
-
-                #[test]
-                fn test_non_standard() {
-                    let function = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
-                        name: "NonStandardAttribute".to_string(),
-                        values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
-                    });
-                    // NOTE there is no '.' prefix, spaces are not trimmed
-                    assert_code!(function, "%TFNonStandardAttribute,Value 1 , Value 2*%\n");
-                }
-
-                #[test]
-                fn test_unsupported_standard() {
-                    let function = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
-                        name: ".UnsupportedStandardAttribute".to_string(),
-                        values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
-                    });
-                    // NOTE there *is* a '.' prefix, spaces are not trimmed
-                    assert_code!(
-                        function,
-                        "%TF.UnsupportedStandardAttribute,Value 1 , Value 2*%\n"
-                    );
-                }
+            fn test_unsupported_standard() {
+                let function = ExtendedCode::FileAttribute(FileAttribute::UserDefined {
+                    name: ".UnsupportedStandardAttribute".to_string(),
+                    values: vec!["Value 1 ".to_string(), " Value 2".to_string()],
+                });
+                // NOTE there *is* a '.' prefix, spaces are not trimmed
+                assert_code!(
+                    function,
+                    "%TF.UnsupportedStandardAttribute,Value 1 , Value 2*%\n"
+                );
             }
         }
     }

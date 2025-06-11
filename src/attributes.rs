@@ -9,14 +9,15 @@ use crate::traits::PartialGerberCode;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Ident {
-    Guid(Uuid),
+    // Aka 'Guid'
+    Uuid(Uuid),
     Name(String),
 }
 
 impl<W: Write> PartialGerberCode<W> for Ident {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
-            Ident::Guid(guid) => {
+            Ident::Uuid(guid) => {
                 write!(writer, "{}", guid)?;
             }
             Ident::Name(value) => {
@@ -32,17 +33,25 @@ impl<W: Write> PartialGerberCode<W> for Ident {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FileAttribute {
+    /// "%TF.Part,(Single|Array|FabricationPanel|Coupon|Other,<mandatory description>)>*%
     Part(Part),
+    /// "%TF.FileFunction,<args>*%
     FileFunction(FileFunction),
+    /// "%TF.FilePolarity,(Positive|Negative)>*%
     FilePolarity(FilePolarity),
-    SameCoordinates(Ident),
+    /// "%TF.SameCoordinates[,<ident>]*%"
+    SameCoordinates(Option<Ident>),
+    /// "%TF.CreationDate,2015-02-23T15:59:51+01:00*%" ISO8601 + TZ
     CreationDate(DateTime<FixedOffset>),
+    /// "%TF.GenerationSoftware,<vendor>,<application>,<version>*%"
     GenerationSoftware(GenerationSoftware),
+    /// "%TF.ProjectId,<Name>,<GUID>,<Revision>*%"
     ProjectId {
         id: String,
         guid: Uuid,
         revision: String,
     },
+    /// "%TF.MD5,6ab9e892830469cdff7e3e346331d404*%"
     Md5(String),
     UserDefined {
         name: String,
@@ -224,7 +233,10 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
             }
             FileAttribute::SameCoordinates(ident) => {
                 write!(writer, ".SameCoordinates")?;
-                ident.serialize_partial(writer)?;
+                if let Some(ident) = ident {
+                    write!(writer, ",")?;
+                    ident.serialize_partial(writer)?;
+                }
             }
             FileAttribute::CreationDate(date) => {
                 write!(writer, ".CreationDate,{}", date.to_rfc3339())?;
