@@ -48,7 +48,7 @@ pub enum FileAttribute {
     /// "%TF.ProjectId,<Name>,<GUID>,<Revision>*%"
     ProjectId {
         id: String,
-        guid: Uuid,
+        uuid: Uuid,
         revision: String,
     },
     /// "%TF.MD5,6ab9e892830469cdff7e3e346331d404*%"
@@ -245,8 +245,8 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                 write!(writer, ".GenerationSoftware,")?;
                 gs.serialize_partial(writer)?;
             }
-            FileAttribute::ProjectId { id, guid, revision } => {
-                write!(writer, ".ProjectId,{},{},{}", id, guid, revision)?;
+            FileAttribute::ProjectId { id, uuid, revision } => {
+                write!(writer, ".ProjectId,{},{},{}", id, uuid, revision)?;
             }
             FileAttribute::Md5(ref hash) => write!(writer, ".MD5,{}", hash)?,
             FileAttribute::UserDefined { name, values } => {
@@ -702,7 +702,8 @@ pub enum FileFunction {
     },
     /// Apparently, this should be used instead of `KeepOut` since 2017.11, see "11.15 Revision 2017.11" but this makes no sense
     /// Since keep-out has a `Position` but Profile does not...
-    Profile(Profile),
+    /// Additionally, DipTrace does not specify the 'N/NP', e.g. "%TF.FileFunction,Profile*%"
+    Profile(Option<Profile>),
     KeepOut(Position),
     SolderMask {
         pos: Position,

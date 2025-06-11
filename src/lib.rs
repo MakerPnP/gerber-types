@@ -340,7 +340,7 @@ mod serialization_tests {
         fn test_project_id() {
             let proj = ExtendedCode::FileAttribute(FileAttribute::ProjectId {
                 id: "Project".into(),
-                guid: Uuid::max(),
+                uuid: Uuid::max(),
                 revision: "rev1".into(),
             });
             assert_code!(
