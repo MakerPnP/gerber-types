@@ -182,7 +182,7 @@ impl CoordinateNumber {
         }
         if self.nano.abs() >= 10_i64.pow((format.integer + DECIMAL_PLACES_CHARS) as u32) {
             return Err(GerberError::CoordinateFormatError(
-                "Number is too large for chosen format!".into(),
+                "Number is too large for the chosen format!".into(),
             ));
         }
 

@@ -1,4 +1,5 @@
-//! Example from spec chapter 2.12.2
+//! Example from an older version of the Gerber Specification
+//! chapter 2.12.2
 use std::io::stdout;
 
 use std::convert::TryFrom;

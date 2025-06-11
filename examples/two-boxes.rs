@@ -1,4 +1,5 @@
-//! Example from spec chapter 2.12.1
+//! Example from Gerber Specification
+//! 2025.05 - 2.11.1 "Example: Two Square Boxes"
 
 use std::io::stdout;
 
@@ -11,21 +12,18 @@ use gerber_types::{
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-    let cf = CoordinateFormat::new(2, 5);
+    let cf = CoordinateFormat::new(2, 6);
     let commands: Vec<Command> = vec![
         FunctionCode::GCode(GCode::Comment("Ucamco ex. 1: Two square boxes".to_string())).into(),
-        ExtendedCode::CoordinateFormat(cf).into(),
         ExtendedCode::Unit(Unit::Millimeters).into(),
+        ExtendedCode::CoordinateFormat(cf).into(),
         ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(GenerationSoftware::new(
-            "Rust Gerber",
+            "MakerPnP",
             "gerber-types",
             Some(VERSION),
         )))
         .into(),
-        ExtendedCode::FileAttribute(FileAttribute::Part(Part::Other(
-            "Only an example".to_string(),
-        )))
-        .into(),
+        ExtendedCode::FileAttribute(FileAttribute::Part(Part::Other("example".to_string()))).into(),
         ExtendedCode::LoadPolarity(Polarity::Dark).into(),
         ExtendedCode::ApertureDefinition(ApertureDefinition {
             code: 10,
@@ -41,8 +39,6 @@ fn main() {
         ))))
         .into(),
         FunctionCode::GCode(GCode::InterpolationMode(InterpolationMode::Linear)).into(),
-        // TODO: The interpolate representation needs to take the coordinate
-        // format into account!
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
             Coordinates::new(5, 0, cf),
             None,
