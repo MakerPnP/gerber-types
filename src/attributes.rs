@@ -264,7 +264,7 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
 }
 
 // TextMode
-#[derive(Debug, Clone, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Hash)]
 pub enum TextMode {
     BarCode,
     Characters,
@@ -287,7 +287,7 @@ impl<W: Write> PartialGerberCode<W> for TextMode {
 }
 
 // TextMirroring
-#[derive(Debug, Clone, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Hash)]
 pub enum TextMirroring {
     Readable,
     Mirrored,
@@ -556,7 +556,7 @@ impl<W: Write> PartialGerberCode<W> for Part {
 
 // Position
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Position {
     Top,
     Bottom,
@@ -574,7 +574,7 @@ impl<W: Write> PartialGerberCode<W> for Position {
 
 // ExtendedPosition
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ExtendedPosition {
     Top,
     Inner,
@@ -600,7 +600,7 @@ impl<W: Write> PartialGerberCode<W> for ExtendedPosition {
 
 // CopperType
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CopperType {
     Plane,
     Signal,
@@ -628,7 +628,7 @@ impl<W: Write> PartialGerberCode<W> for CopperType {
 
 // PlatedDrill
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum PlatedDrill {
     PlatedThroughHole,
     Blind,
@@ -648,7 +648,7 @@ impl<W: Write> PartialGerberCode<W> for PlatedDrill {
 
 // NonPlatedDrill
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum NonPlatedDrill {
     NonPlatedThroughHole,
     Blind,
@@ -668,7 +668,7 @@ impl<W: Write> PartialGerberCode<W> for NonPlatedDrill {
 
 // DrillRouteType
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum DrillRouteType {
     Drill,
     Route,
@@ -688,7 +688,7 @@ impl<W: Write> PartialGerberCode<W> for DrillRouteType {
 
 // Profile
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Profile {
     Plated,
     NonPlated,
@@ -789,7 +789,7 @@ pub enum FileFunction {
 
 // FilePolarity
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum FilePolarity {
     Positive,
     Negative,
@@ -886,7 +886,7 @@ pub enum ApertureFunction {
     Drawing,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum IPC4761ViaProtection {
     Ia,
     Ib,
@@ -942,7 +942,7 @@ impl<W: Write> PartialGerberCode<W> for IPC4761ViaProtection {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ComponentOutline {
     Body,
     Lead2Lead,
@@ -975,7 +975,7 @@ impl<W: Write> PartialGerberCode<W> for ComponentOutline {
 }
 // DrillFunction
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum DrillFunction {
     BreakOut,
     Tooling,
@@ -990,7 +990,7 @@ impl DrillFunction {
 
 // ComponentDrill
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ComponentDrill {
     PressFit,
 }
@@ -1012,7 +1012,7 @@ impl<W: Write> PartialGerberCode<W> for ComponentDrill {
 
 // SmdPadType
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SmdPadType {
     CopperDefined,
     SoldermaskDefined,
@@ -1036,7 +1036,7 @@ impl<W: Write> PartialGerberCode<W> for SmdPadType {
 
 // FiducialScope
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum FiducialScope {
     Local,
     Global,
@@ -1163,7 +1163,7 @@ impl<W: Write> PartialGerberCode<W> for ComponentCharacteristics {
         Ok(())
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ComponentMounting {
     ThroughHole,
     /// Surface mount device
