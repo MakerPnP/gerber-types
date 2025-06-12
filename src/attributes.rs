@@ -360,17 +360,7 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                         write!(writer, "MechanicalDrill")?;
                         if let Some(ref function) = function {
                             write!(writer, ",")?;
-                            match function {
-                                DrillFunction::Tooling => {
-                                    write!(writer, "Tooling")?;
-                                }
-                                DrillFunction::BreakOut => {
-                                    write!(writer, "BreakOut")?;
-                                }
-                                DrillFunction::Other => {
-                                    write!(writer, "Other")?;
-                                }
-                            }
+                            function.serialize_partial(writer)?;
                         }
                     }
                     ApertureFunction::CastellatedDrill => {
@@ -985,6 +975,18 @@ pub enum DrillFunction {
 impl DrillFunction {
     pub fn values() -> &'static [Self] {
         &[Self::BreakOut, Self::Tooling, Self::Other]
+    }
+}
+
+impl<W: Write> PartialGerberCode<W> for DrillFunction {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            DrillFunction::Tooling => write!(writer, "Tooling")?,
+            DrillFunction::BreakOut => write!(writer, "BreakOut")?,
+            DrillFunction::Other => write!(writer, "Other")?,
+        }
+
+        Ok(())
     }
 }
 
