@@ -182,7 +182,7 @@ impl CoordinateNumber {
         Ok(number.to_string())
     }
 
-    pub fn validate(&self, format: &CoordinateFormat) -> Result<(), GerberError> {
+    pub fn validate(self, format: &CoordinateFormat) -> Result<Self, GerberError> {
         if format.decimal > DECIMAL_PLACES_CHARS {
             return Err(GerberError::CoordinateFormatError(
                 "Invalid precision: Too high!".into(),
@@ -193,7 +193,7 @@ impl CoordinateNumber {
                 "Number is too large for the chosen format!".into(),
             ));
         }
-        Ok(())
+        Ok(self)
     }
 }
 
