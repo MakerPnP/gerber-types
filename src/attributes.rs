@@ -270,6 +270,12 @@ pub enum TextMode {
     Characters,
 }
 
+impl TextMode {
+    pub fn values() -> &'static [Self] {
+        &[Self::BarCode, Self::Characters]
+    }
+}
+
 impl<W: Write> PartialGerberCode<W> for TextMode {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
@@ -285,6 +291,12 @@ impl<W: Write> PartialGerberCode<W> for TextMode {
 pub enum TextMirroring {
     Readable,
     Mirrored,
+}
+
+impl TextMirroring {
+    pub fn values() -> &'static [Self] {
+        &[Self::Readable, Self::Mirrored]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for TextMirroring {
@@ -568,6 +580,12 @@ pub enum ExtendedPosition {
     Bottom,
 }
 
+impl ExtendedPosition {
+    pub fn values() -> &'static [Self] {
+        &[Self::Top, Self::Inner, Self::Bottom]
+    }
+}
+
 impl<W: Write> PartialGerberCode<W> for ExtendedPosition {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match *self {
@@ -587,6 +605,17 @@ pub enum CopperType {
     Signal,
     Mixed,
     Hatched,
+}
+
+impl CopperType {
+    pub fn values() -> &'static [Self] {
+        &[
+            Self::Plane,
+            Self::Signal,
+            Self::Mixed,
+            Self::Hatched,
+        ]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for CopperType {
@@ -610,6 +639,12 @@ pub enum PlatedDrill {
     Buried,
 }
 
+impl PlatedDrill {
+    pub fn values() -> &'static [Self] {
+        &[Self::PlatedThroughHole, Self::Blind, Self::Buried]
+    }
+}
+
 impl<W: Write> PartialGerberCode<W> for PlatedDrill {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
@@ -628,6 +663,12 @@ pub enum NonPlatedDrill {
     NonPlatedThroughHole,
     Blind,
     Buried,
+}
+
+impl NonPlatedDrill {
+    pub fn values() -> &'static [Self] {
+        &[Self::NonPlatedThroughHole, Self::Blind, Self::Buried]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for NonPlatedDrill {
@@ -650,6 +691,12 @@ pub enum DrillRouteType {
     Mixed,
 }
 
+impl DrillRouteType {
+    pub fn values() -> &'static [Self] {
+        &[Self::Drill, Self::Route, Self::Mixed]
+    }
+}
+
 impl<W: Write> PartialGerberCode<W> for DrillRouteType {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
@@ -667,6 +714,12 @@ impl<W: Write> PartialGerberCode<W> for DrillRouteType {
 pub enum Profile {
     Plated,
     NonPlated,
+}
+
+impl Profile {
+    pub fn values() -> &'static [Self] {
+        &[Self::Plated, Self::NonPlated]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for Profile {
@@ -768,6 +821,12 @@ pub enum FileFunction {
 pub enum FilePolarity {
     Positive,
     Negative,
+}
+
+impl FilePolarity {
+    pub fn values() -> &'static [Self] {
+        &[Self::Positive, Self::Negative]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for FilePolarity {
@@ -877,6 +936,25 @@ pub enum IPC4761ViaProtection {
     None,
 }
 
+impl IPC4761ViaProtection {
+    pub fn values() -> &'static [Self] {
+        &[
+            Self::Ia,
+            Self::Ib,
+            Self::IIa,
+            Self::IIb,
+            Self::IIIa,
+            Self::IIIb,
+            Self::IVa,
+            Self::IVb,
+            Self::V,
+            Self::VI,
+            Self::VII,
+            Self::None,
+        ]
+    }
+}
+
 impl<W: Write> PartialGerberCode<W> for IPC4761ViaProtection {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         let code = match self {
@@ -906,6 +984,17 @@ pub enum ComponentOutline {
     Courtyard,
 }
 
+impl ComponentOutline {
+    pub fn values() -> &'static [Self] {
+        &[
+            Self::Body,
+            Self::Lead2Lead,
+            Self::Footprint,
+            Self::Courtyard,
+        ]
+    }
+}
+
 impl<W: Write> PartialGerberCode<W> for ComponentOutline {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         let code = match self {
@@ -927,12 +1016,25 @@ pub enum DrillFunction {
     Other,
 }
 
+impl DrillFunction {
+    pub fn values() -> &'static [Self] {
+        &[Self::BreakOut, Self::Tooling, Self::Other]
+    }
+}
+
+
 // SmdPadType
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SmdPadType {
     CopperDefined,
     SoldermaskDefined,
+}
+
+impl SmdPadType {
+    pub fn values() -> &'static [Self] {
+        &[Self::CopperDefined, Self::SoldermaskDefined]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for SmdPadType {
@@ -952,6 +1054,12 @@ pub enum FiducialScope {
     Local,
     Global,
     Panel,
+}
+
+impl FiducialScope {
+    pub fn values() -> &'static [Self] {
+        &[Self::Local, Self::Global, Self::Panel]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for FiducialScope {
@@ -1075,6 +1183,12 @@ pub enum ComponentMounting {
     SMD,
     PressFit,
     Other,
+}
+
+impl ComponentMounting {
+    pub fn values() -> &'static [Self] {
+        &[Self::ThroughHole, Self::SMD, Self::PressFit, Self::Other]
+    }
 }
 
 impl<W: Write> PartialGerberCode<W> for ComponentMounting {
