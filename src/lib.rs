@@ -1137,26 +1137,22 @@ mod serialization_tests {
         #[test]
         fn test_component_outline() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentOutline(None),
-            ));
-            assert_code!(function, "%TA.AperFunction,ComponentOutline*%\n");
-            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentOutline(Some(ComponentOutline::Body)),
+                ApertureFunction::ComponentOutline(ComponentOutline::Body),
             ));
             assert_code!(function, "%TA.AperFunction,ComponentOutline,Body*%\n");
 
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentOutline(Some(ComponentOutline::Lead2Lead)),
+                ApertureFunction::ComponentOutline(ComponentOutline::Lead2Lead),
             ));
             assert_code!(function, "%TA.AperFunction,ComponentOutline,Lead2Lead*%\n");
 
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentOutline(Some(ComponentOutline::Footprint)),
+                ApertureFunction::ComponentOutline(ComponentOutline::Footprint),
             ));
             assert_code!(function, "%TA.AperFunction,ComponentOutline,Footprint*%\n");
 
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentOutline(Some(ComponentOutline::Courtyard)),
+                ApertureFunction::ComponentOutline(ComponentOutline::Courtyard),
             ));
             assert_code!(function, "%TA.AperFunction,ComponentOutline,Courtyard*%\n");
         }

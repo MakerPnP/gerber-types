@@ -437,11 +437,8 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                         write!(writer, "ComponentMain")?;
                     }
                     ApertureFunction::ComponentOutline(ref value) => {
-                        write!(writer, "ComponentOutline")?;
-                        if let Some(value) = value {
-                            write!(writer, ",")?;
-                            value.serialize_partial(writer)?;
-                        }
+                        write!(writer, "ComponentOutline,")?;
+                        value.serialize_partial(writer)?;
                     }
                     ApertureFunction::ComponentPin => {
                         write!(writer, "ComponentPin")?;
@@ -866,7 +863,7 @@ pub enum ApertureFunction {
 
     // "Component layers"
     ComponentMain,
-    ComponentOutline(Option<ComponentOutline>),
+    ComponentOutline(ComponentOutline),
     ComponentPin,
 
     // 2024.05 - 8.4 - "Deprecated attribute values"
