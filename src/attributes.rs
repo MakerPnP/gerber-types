@@ -1062,13 +1062,29 @@ impl<W: Write> PartialGerberCode<W> for FiducialScope {
 // ObjectAttribute
 #[derive(Debug, Clone, PartialEq)]
 pub enum ObjectAttribute {
+    Net(Net),
+    Pin(Pin),
+    /// aka 'RefDes'
+    Component(String),
     ComponentCharacteristics(ComponentCharacteristics),
-    UserDefined { name: String, values: Vec<String> },
+    UserDefined {
+        name: String,
+        values: Vec<String>,
+    },
 }
 
 impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
+            ObjectAttribute::Net(net) => {
+                net.serialize_partial(writer)?;
+            }
+            ObjectAttribute::Pin(pin) => {
+                pin.serialize_partial(writer)?;
+            }
+            ObjectAttribute::Component(ref_des) => {
+                write!(writer, ".C,{}", ref_des)?;
+            }
             ObjectAttribute::ComponentCharacteristics(cc) => {
                 cc.serialize_partial(writer)?;
             }
@@ -1204,6 +1220,47 @@ impl<W: Write> PartialGerberCode<W> for SupplierPart {
             "{},{}",
             self.supplier_name, self.supplier_part_reference
         )?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Net {
+    None,
+    NotConnected,
+    Connected(Vec<String>),
+}
+
+impl<W: Write> PartialGerberCode<W> for Net {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(writer, ".N,")?;
+        match self {
+            Net::None => {}
+            Net::NotConnected => {
+                write!(writer, "N/C")?;
+            }
+            Net::Connected(nets) => {
+                write!(writer, "{}", nets.join(","))?;
+            }
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Pin {
+    pub refdes: String,
+    /// 2024.05 spec calls this 'number' but a) it's defined as a string, and b) pins like 'EP' (for exposed pad) are not numbers.
+    pub name: String,
+    pub function: Option<String>,
+}
+
+impl<W: Write> PartialGerberCode<W> for Pin {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(writer, ".P,{},{}", self.refdes, self.name)?;
+        if let Some(function) = &self.function {
+            write!(writer, ",{}", function)?;
+        }
         Ok(())
     }
 }

@@ -1274,6 +1274,68 @@ mod serialization_tests {
     mod object_attribute {
         use super::*;
 
+        mod net {
+            use super::*;
+            #[test]
+            fn test_none() {
+                let function = ExtendedCode::ObjectAttribute(ObjectAttribute::Net(Net::None));
+                assert_code!(function, "%TO.N,*%\n");
+            }
+
+            #[test]
+            fn test_not_connected() {
+                let function =
+                    ExtendedCode::ObjectAttribute(ObjectAttribute::Net(Net::NotConnected));
+                assert_code!(function, "%TO.N,N/C*%\n");
+            }
+
+            #[test]
+            fn test_connected() {
+                let function =
+                    ExtendedCode::ObjectAttribute(ObjectAttribute::Net(Net::Connected(vec![
+                        "Net1".to_string(),
+                        "Net2".to_string(),
+                        "Net3".to_string(),
+                    ])));
+                assert_code!(function, "%TO.N,Net1,Net2,Net3*%\n");
+            }
+        }
+
+        mod pin {
+            use super::*;
+
+            #[test]
+            fn test_pin() {
+                let function = ExtendedCode::ObjectAttribute(ObjectAttribute::Pin(Pin {
+                    refdes: "U1".to_string(),
+                    name: "1".to_string(),
+                    function: None,
+                }));
+                assert_code!(function, "%TO.P,U1,1*%\n");
+            }
+
+            #[test]
+            fn test_pin_with_functin() {
+                let function = ExtendedCode::ObjectAttribute(ObjectAttribute::Pin(Pin {
+                    refdes: "Q1".to_string(),
+                    name: "EP".to_string(),
+                    function: Some("Thermal pad".to_string()),
+                }));
+                assert_code!(function, "%TO.P,Q1,EP,Thermal pad*%\n");
+            }
+        }
+
+        mod ref_des {
+            use super::*;
+
+            #[test]
+            fn test_component() {
+                let function =
+                    ExtendedCode::ObjectAttribute(ObjectAttribute::Component("R1".to_string()));
+                assert_code!(function, "%TO.C,R1*%\n");
+            }
+        }
+
         mod component_characteristics {
             use super::*;
 
