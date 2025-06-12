@@ -853,23 +853,16 @@ mod serialization_tests {
         #[test]
         fn test_component_drill() {
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentDrill { press_fit: None },
+                ApertureFunction::ComponentDrill { function: None },
             ));
             assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
 
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::ComponentDrill {
-                    press_fit: Some(true),
+                    function: Some(ComponentDrill::PressFit),
                 },
             ));
             assert_code!(function, "%TA.AperFunction,ComponentDrill,PressFit*%\n");
-
-            let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
-                ApertureFunction::ComponentDrill {
-                    press_fit: Some(false),
-                },
-            ));
-            assert_code!(function, "%TA.AperFunction,ComponentDrill*%\n");
         }
 
         #[test]

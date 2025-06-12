@@ -349,10 +349,11 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                     ApertureFunction::BackDrill => {
                         write!(writer, "BackDrill")?;
                     }
-                    ApertureFunction::ComponentDrill { press_fit } => {
+                    ApertureFunction::ComponentDrill { ref function } => {
                         write!(writer, "ComponentDrill")?;
-                        if matches!(press_fit, Some(true)) {
-                            write!(writer, ",PressFit")?;
+                        if let Some(function) = function {
+                            write!(writer, ",")?;
+                            function.serialize_partial(writer)?;
                         }
                     }
                     ApertureFunction::MechanicalDrill { function } => {
@@ -609,12 +610,7 @@ pub enum CopperType {
 
 impl CopperType {
     pub fn values() -> &'static [Self] {
-        &[
-            Self::Plane,
-            Self::Signal,
-            Self::Mixed,
-            Self::Hatched,
-        ]
+        &[Self::Plane, Self::Signal, Self::Mixed, Self::Hatched]
     }
 }
 
@@ -639,12 +635,6 @@ pub enum PlatedDrill {
     Buried,
 }
 
-impl PlatedDrill {
-    pub fn values() -> &'static [Self] {
-        &[Self::PlatedThroughHole, Self::Blind, Self::Buried]
-    }
-}
-
 impl<W: Write> PartialGerberCode<W> for PlatedDrill {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
@@ -663,12 +653,6 @@ pub enum NonPlatedDrill {
     NonPlatedThroughHole,
     Blind,
     Buried,
-}
-
-impl NonPlatedDrill {
-    pub fn values() -> &'static [Self] {
-        &[Self::NonPlatedThroughHole, Self::Blind, Self::Buried]
-    }
 }
 
 impl<W: Write> PartialGerberCode<W> for NonPlatedDrill {
@@ -691,12 +675,6 @@ pub enum DrillRouteType {
     Mixed,
 }
 
-impl DrillRouteType {
-    pub fn values() -> &'static [Self] {
-        &[Self::Drill, Self::Route, Self::Mixed]
-    }
-}
-
 impl<W: Write> PartialGerberCode<W> for DrillRouteType {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self {
@@ -714,12 +692,6 @@ impl<W: Write> PartialGerberCode<W> for DrillRouteType {
 pub enum Profile {
     Plated,
     NonPlated,
-}
-
-impl Profile {
-    pub fn values() -> &'static [Self] {
-        &[Self::Plated, Self::NonPlated]
-    }
 }
 
 impl<W: Write> PartialGerberCode<W> for Profile {
@@ -823,12 +795,6 @@ pub enum FilePolarity {
     Negative,
 }
 
-impl FilePolarity {
-    pub fn values() -> &'static [Self] {
-        &[Self::Positive, Self::Negative]
-    }
-}
-
 impl<W: Write> PartialGerberCode<W> for FilePolarity {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match *self {
@@ -876,7 +842,7 @@ pub enum ApertureFunction {
     // "Drill and rout layers"
     ViaDrill(Option<IPC4761ViaProtection>),
     BackDrill,
-    ComponentDrill { press_fit: Option<bool> },
+    ComponentDrill { function: Option<ComponentDrill> },
     MechanicalDrill { function: Option<DrillFunction> },
     CastellatedDrill,
     OtherDrill(String),
@@ -1022,6 +988,27 @@ impl DrillFunction {
     }
 }
 
+// ComponentDrill
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ComponentDrill {
+    PressFit,
+}
+
+impl ComponentDrill {
+    pub fn values() -> &'static [Self] {
+        &[Self::PressFit]
+    }
+}
+
+impl<W: Write> PartialGerberCode<W> for ComponentDrill {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            ComponentDrill::PressFit => write!(writer, "PressFit")?,
+        };
+        Ok(())
+    }
+}
 
 // SmdPadType
 
