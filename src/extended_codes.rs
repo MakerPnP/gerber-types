@@ -5,24 +5,21 @@ use std::io::Write;
 use crate::errors::GerberResult;
 use crate::traits::PartialGerberCode;
 use crate::MacroDecimal;
+use strum_macros;
+use strum_macros::{IntoStaticStr, VariantArray, VariantNames};
 
 // Unit
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Unit {
+    #[strum(serialize = "IN")]
     Inches,
+    #[strum(serialize = "MM")]
     Millimeters,
 }
 
-impl<W: Write> PartialGerberCode<W> for Unit {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            Unit::Millimeters => write!(writer, "MM")?,
-            Unit::Inches => write!(writer, "IN")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(Unit);
 
 // ApertureDefinition
 
@@ -221,43 +218,30 @@ impl<W: Write> PartialGerberCode<W> for Polygon {
 
 // Polarity
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Polarity {
+    #[strum(serialize = "C")]
     Clear,
+    #[strum(serialize = "D")]
     Dark,
 }
 
-impl<W: Write> PartialGerberCode<W> for Polarity {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            Polarity::Clear => write!(writer, "C")?,
-            Polarity::Dark => write!(writer, "D")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(Polarity);
 
 // Mirroring
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Mirroring {
+    #[strum(serialize = "N")]
     None,
     X,
     Y,
     XY,
 }
 
-impl<W: Write> PartialGerberCode<W> for Mirroring {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            Mirroring::None => write!(writer, "N")?,
-            Mirroring::X => write!(writer, "X")?,
-            Mirroring::Y => write!(writer, "Y")?,
-            Mirroring::XY => write!(writer, "XY")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(Mirroring);
 
 // Scaling
 

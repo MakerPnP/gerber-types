@@ -1,6 +1,7 @@
 //! Attributes.
 
 use std::io::Write;
+use strum_macros::{IntoStaticStr, VariantArray, VariantNames};
 use uuid::Uuid;
 
 use crate::errors::GerberResult;
@@ -264,50 +265,28 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
 }
 
 // TextMode
-#[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum TextMode {
+    #[strum(serialize = "B")]
     BarCode,
+    #[strum(serialize = "C")]
     Characters,
 }
 
-impl TextMode {
-    pub fn values() -> &'static [Self] {
-        &[Self::BarCode, Self::Characters]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for TextMode {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            Self::Characters => write!(writer, "C")?,
-            Self::BarCode => write!(writer, "B")?,
-        }
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(TextMode);
 
 // TextMirroring
-#[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum TextMirroring {
+    #[strum(serialize = "R")]
     Readable,
+    #[strum(serialize = "M")]
     Mirrored,
 }
 
-impl TextMirroring {
-    pub fn values() -> &'static [Self] {
-        &[Self::Readable, Self::Mirrored]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for TextMirroring {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            Self::Readable => write!(writer, "R")?,
-            Self::Mirrored => write!(writer, "M")?,
-        }
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(TextMirroring);
 
 // ApertureAttribute
 
@@ -543,51 +522,45 @@ impl<W: Write> PartialGerberCode<W> for Part {
 
 // Position
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(
+    Debug,
+    Copy,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    strum_macros::Display,
+    IntoStaticStr,
+    VariantNames,
+    VariantArray,
+)]
+#[strum(serialize_all = "PascalCase")]
 pub enum Position {
     Top,
+    #[strum(serialize = "Bot")]
     Bottom,
 }
 
-impl<W: Write> PartialGerberCode<W> for Position {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            Position::Top => write!(writer, "Top")?,
-            Position::Bottom => write!(writer, "Bot")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(Position);
 
 // ExtendedPosition
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum ExtendedPosition {
     Top,
+    #[strum(serialize = "Inr")]
     Inner,
+    #[strum(serialize = "Bot")]
     Bottom,
 }
 
-impl ExtendedPosition {
-    pub fn values() -> &'static [Self] {
-        &[Self::Top, Self::Inner, Self::Bottom]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for ExtendedPosition {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            ExtendedPosition::Top => write!(writer, "Top")?,
-            ExtendedPosition::Inner => write!(writer, "Inr")?,
-            ExtendedPosition::Bottom => write!(writer, "Bot")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(ExtendedPosition);
 
 // CopperType
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum CopperType {
     Plane,
     Signal,
@@ -595,101 +568,58 @@ pub enum CopperType {
     Hatched,
 }
 
-impl CopperType {
-    pub fn values() -> &'static [Self] {
-        &[Self::Plane, Self::Signal, Self::Mixed, Self::Hatched]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for CopperType {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            CopperType::Plane => write!(writer, "Plane")?,
-            CopperType::Signal => write!(writer, "Signal")?,
-            CopperType::Mixed => write!(writer, "Mixed")?,
-            CopperType::Hatched => write!(writer, "Hatched")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(CopperType);
 
 // PlatedDrill
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum PlatedDrill {
+    #[strum(serialize = "PTH")]
     PlatedThroughHole,
     Blind,
     Buried,
 }
 
-impl<W: Write> PartialGerberCode<W> for PlatedDrill {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            PlatedDrill::PlatedThroughHole => write!(writer, "PTH")?,
-            PlatedDrill::Blind => write!(writer, "Blind")?,
-            PlatedDrill::Buried => write!(writer, "Buried")?,
-        }
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(PlatedDrill);
 
 // NonPlatedDrill
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum NonPlatedDrill {
+    #[strum(serialize = "NPTH")]
     NonPlatedThroughHole,
     Blind,
     Buried,
 }
 
-impl<W: Write> PartialGerberCode<W> for NonPlatedDrill {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            NonPlatedDrill::NonPlatedThroughHole => write!(writer, "NPTH")?,
-            NonPlatedDrill::Blind => write!(writer, "Blind")?,
-            NonPlatedDrill::Buried => write!(writer, "Buried")?,
-        }
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(NonPlatedDrill);
 
 // DrillRouteType
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum DrillRouteType {
     Drill,
+    #[strum(serialize = "Rout")]
     Route,
     Mixed,
 }
 
-impl<W: Write> PartialGerberCode<W> for DrillRouteType {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            DrillRouteType::Drill => write!(writer, "Drill")?,
-            DrillRouteType::Route => write!(writer, "Rout")?,
-            DrillRouteType::Mixed => write!(writer, "Mixed")?,
-        }
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(DrillRouteType);
 
 // Profile
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
 pub enum Profile {
+    #[strum(serialize = "P")]
     Plated,
+    #[strum(serialize = "NP")]
     NonPlated,
 }
 
-impl<W: Write> PartialGerberCode<W> for Profile {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            Profile::Plated => write!(writer, "P")?,
-            Profile::NonPlated => write!(writer, "NP")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(Profile);
 
 // FileFunction
 
@@ -776,21 +706,14 @@ pub enum FileFunction {
 
 // FilePolarity
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum FilePolarity {
     Positive,
     Negative,
 }
 
-impl<W: Write> PartialGerberCode<W> for FilePolarity {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match *self {
-            FilePolarity::Positive => write!(writer, "Positive")?,
-            FilePolarity::Negative => write!(writer, "Negative")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(FilePolarity);
 
 // GenerationSoftware
 
@@ -873,63 +796,31 @@ pub enum ApertureFunction {
     Drawing,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum IPC4761ViaProtection {
     Ia,
     Ib,
     IIa,
     IIb,
+    #[strum(serialize = "IIIa")]
     IIIa,
+    #[strum(serialize = "IIIb")]
     IIIb,
     IVa,
     IVb,
     V,
+    #[strum(serialize = "VI")]
     VI,
+    #[strum(serialize = "VII")]
     VII,
     None,
 }
 
-impl IPC4761ViaProtection {
-    pub fn values() -> &'static [Self] {
-        &[
-            Self::Ia,
-            Self::Ib,
-            Self::IIa,
-            Self::IIb,
-            Self::IIIa,
-            Self::IIIb,
-            Self::IVa,
-            Self::IVb,
-            Self::V,
-            Self::VI,
-            Self::VII,
-            Self::None,
-        ]
-    }
-}
+impl_partial_gerber_code_via_strum!(IPC4761ViaProtection);
 
-impl<W: Write> PartialGerberCode<W> for IPC4761ViaProtection {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        let code = match self {
-            IPC4761ViaProtection::Ia => "Ia",
-            IPC4761ViaProtection::Ib => "Ib",
-            IPC4761ViaProtection::IIa => "IIa",
-            IPC4761ViaProtection::IIb => "IIb",
-            IPC4761ViaProtection::IIIa => "IIIa",
-            IPC4761ViaProtection::IIIb => "IIIb",
-            IPC4761ViaProtection::IVa => "IVa",
-            IPC4761ViaProtection::IVb => "IVb",
-            IPC4761ViaProtection::V => "V",
-            IPC4761ViaProtection::VI => "VI",
-            IPC4761ViaProtection::VII => "VII",
-            IPC4761ViaProtection::None => "None",
-        };
-        write!(writer, "{}", code)?;
-        Ok(())
-    }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum ComponentOutline {
     Body,
     Lead2Lead,
@@ -937,127 +828,56 @@ pub enum ComponentOutline {
     Courtyard,
 }
 
-impl ComponentOutline {
-    pub fn values() -> &'static [Self] {
-        &[
-            Self::Body,
-            Self::Lead2Lead,
-            Self::Footprint,
-            Self::Courtyard,
-        ]
-    }
-}
+impl_partial_gerber_code_via_strum!(ComponentOutline);
 
-impl<W: Write> PartialGerberCode<W> for ComponentOutline {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        let code = match self {
-            ComponentOutline::Body => "Body",
-            ComponentOutline::Lead2Lead => "Lead2Lead",
-            ComponentOutline::Footprint => "Footprint",
-            ComponentOutline::Courtyard => "Courtyard",
-        };
-        write!(writer, "{}", code)?;
-        Ok(())
-    }
-}
 // DrillFunction
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum DrillFunction {
+    #[strum(serialize = "Breakout")]
     BreakOut,
     Tooling,
     Other,
 }
 
-impl DrillFunction {
-    pub fn values() -> &'static [Self] {
-        &[Self::BreakOut, Self::Tooling, Self::Other]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for DrillFunction {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            DrillFunction::Tooling => write!(writer, "Tooling")?,
-            DrillFunction::BreakOut => write!(writer, "BreakOut")?,
-            DrillFunction::Other => write!(writer, "Other")?,
-        }
-
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(DrillFunction);
 
 // ComponentDrill
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+/// 2024.05 spec mismatch warning: Aperture function ".AperFunction.ComponentDill" has "PressFit" (uppercase F) whereas Component Characteristics ".CMnt" has "Pressfit" (lowercase f)"
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
 pub enum ComponentDrill {
+    #[strum(serialize = "PressFit")]
     PressFit,
 }
 
-impl ComponentDrill {
-    pub fn values() -> &'static [Self] {
-        &[Self::PressFit]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for ComponentDrill {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            ComponentDrill::PressFit => write!(writer, "PressFit")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(ComponentDrill);
 
 // SmdPadType
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum SmdPadType {
+    #[strum(serialize = "CuDef")]
     CopperDefined,
+    #[strum(serialize = "SMDef")]
     SoldermaskDefined,
 }
 
-impl SmdPadType {
-    pub fn values() -> &'static [Self] {
-        &[Self::CopperDefined, Self::SoldermaskDefined]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for SmdPadType {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            SmdPadType::CopperDefined => write!(writer, "CuDef")?,
-            SmdPadType::SoldermaskDefined => write!(writer, "SMDef")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(SmdPadType);
 
 // FiducialScope
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "PascalCase")]
 pub enum FiducialScope {
     Local,
     Global,
     Panel,
 }
 
-impl FiducialScope {
-    pub fn values() -> &'static [Self] {
-        &[Self::Local, Self::Global, Self::Panel]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for FiducialScope {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            FiducialScope::Global => write!(writer, "Global")?,
-            FiducialScope::Local => write!(writer, "Local")?,
-            FiducialScope::Panel => write!(writer, "Panel")?,
-        };
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(FiducialScope);
 
 // ObjectAttribute
 #[derive(Debug, Clone, PartialEq)]
@@ -1099,8 +919,8 @@ impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
     }
 }
 
-// ComponentCharacteristics
-// 2024.05 - 5.6.1.6 "Cxxx (Component Characteristics)"
+/// ComponentCharacteristics
+/// 2024.05 - 5.6.1.6 "Cxxx (Component Characteristics)"
 #[derive(Debug, Clone, PartialEq)]
 pub enum ComponentCharacteristics {
     /// ".CRot,<decimal>"
@@ -1178,32 +998,22 @@ impl<W: Write> PartialGerberCode<W> for ComponentCharacteristics {
         Ok(())
     }
 }
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+
+/// 2024.05 spec mismatch warning: Aperture function ".AperFunction.ComponentDill" has "PressFit" (uppercase F) whereas Component Characteristics ".CMnt" has "Pressfit" (lowercase f)"
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, IntoStaticStr, VariantNames, VariantArray)]
 pub enum ComponentMounting {
+    #[strum(serialize = "TH")]
     ThroughHole,
     /// Surface mount device
+    #[strum(serialize = "SMD")]
     SMD,
+    #[strum(serialize = "Pressfit")]
     PressFit,
+    #[strum(serialize = "Other")]
     Other,
 }
 
-impl ComponentMounting {
-    pub fn values() -> &'static [Self] {
-        &[Self::ThroughHole, Self::SMD, Self::PressFit, Self::Other]
-    }
-}
-
-impl<W: Write> PartialGerberCode<W> for ComponentMounting {
-    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        match self {
-            ComponentMounting::ThroughHole => write!(writer, "TH")?,
-            ComponentMounting::SMD => write!(writer, "SMD")?,
-            ComponentMounting::PressFit => write!(writer, "Pressfit")?,
-            ComponentMounting::Other => write!(writer, "Other")?,
-        }
-        Ok(())
-    }
-}
+impl_partial_gerber_code_via_strum!(ComponentMounting);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SupplierPart {

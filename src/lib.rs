@@ -23,6 +23,9 @@
 #[macro_use]
 mod test_macros;
 
+#[macro_use]
+mod serialization_macros;
+
 mod attributes;
 mod codegen;
 mod coordinates;
@@ -885,7 +888,7 @@ mod serialization_tests {
                     function: Some(DrillFunction::BreakOut),
                 },
             ));
-            assert_code!(function, "%TA.AperFunction,MechanicalDrill,BreakOut*%\n");
+            assert_code!(function, "%TA.AperFunction,MechanicalDrill,Breakout*%\n");
 
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::MechanicalDrill {
