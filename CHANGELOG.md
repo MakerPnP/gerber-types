@@ -19,6 +19,7 @@ Possible log types:
 - [added] `ApertureBlock`.
 - [added] Serialization of `FileAttribute` (previously it would panic on serializing them).
 - [added] Serialization of `ApertureAttribute` (previously it would panic on serializing them).
+- [added] `VariantNames` and `VariantArray` support for simple enums, via 'strum' crate.
 - [changed] Replaced `Aperture::Other` with `Aperture::Macro`, the latter having option arguments.
 - [changed] Use `MacroBoolean` instead of `bool` for `exposure` on macro primitives.
 - [changed] `PolygonPrimitive::new` uses a `MacroInteger` for the `vertices` argument.
@@ -27,6 +28,7 @@ Possible log types:
   using a trait to convert from integer types or optional integer types.
 - [changed] `Scoring` replaced with `VCut` to match spec.
 - [changed] Various other changes to `ApertureAttribute`, `FileFunction` and `FileAttribute` to match spec.
+- [changed] Bumped MSRV to 1.661 (due to use of 'strum'). 
 - [deprecated] `*Primitive::exposure_on`, replaced with `*Primitive::with_exposure`.
 
 ### v0.3.0 (2022-07-05)
