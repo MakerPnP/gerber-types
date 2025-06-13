@@ -14,14 +14,16 @@
 //!
 //! - [`GerberCode`](trait.GerberCode.html) generates a full Gerber code line,
 //!   terminated with a newline character.
-//! - [`PartialGerberCode`](trait.PartialGerberCode.html) generates Gerber representation of a
+//! - `PartialGerberCode` (internal only) generates Gerber representation of a
 //!   value, but does not represent a full line of code.
-//!   This should only be used by developers implementing parsers. If you need it for another reason, please let us know.
 #![allow(clippy::new_without_default)]
 
 #[cfg(test)]
 #[macro_use]
 mod test_macros;
+
+#[macro_use]
+mod serialization_macros;
 
 mod attributes;
 mod codegen;
@@ -39,7 +41,7 @@ pub use crate::errors::*;
 pub use crate::extended_codes::*;
 pub use crate::function_codes::*;
 pub use crate::macros::*;
-pub use crate::traits::{GerberCode, PartialGerberCode};
+pub use crate::traits::GerberCode;
 pub use crate::types::*;
 
 // re-export some types
@@ -885,7 +887,7 @@ mod serialization_tests {
                     function: Some(DrillFunction::BreakOut),
                 },
             ));
-            assert_code!(function, "%TA.AperFunction,MechanicalDrill,BreakOut*%\n");
+            assert_code!(function, "%TA.AperFunction,MechanicalDrill,Breakout*%\n");
 
             let function = ExtendedCode::ApertureAttribute(ApertureAttribute::ApertureFunction(
                 ApertureFunction::MechanicalDrill {
