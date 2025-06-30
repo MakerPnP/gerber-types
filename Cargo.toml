@@ -1,5 +1,5 @@
 [package]
-name = "gerber_types"
+name = "gerber-types"
 version = "0.4.0"
 documentation = "https://docs.rs/gerber-types/"
 repository = "https://github.com/MakerPnP/gerber-types"
