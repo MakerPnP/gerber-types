@@ -20,6 +20,9 @@ pub enum GerberError {
 
     #[error("I/O error during code generation")]
     IoError(#[from] IoError),
+
+    #[error("Empty coordinates")]
+    EmptyCoordinates,
 }
 
 pub type GerberResult<T> = Result<T, GerberError>;

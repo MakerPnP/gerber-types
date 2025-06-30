@@ -201,6 +201,8 @@ impl CoordinateNumber {
 ///
 /// Coordinates are modal. If an X is omitted, the X coordinate of the
 /// current point is used. Similar for Y.
+///
+/// It is NOT valid for both X and Y to be omitted, instead the Coordinates itself should be contained in an `Option`
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Coordinates {
     pub x: Option<CoordinateNumber>,
@@ -218,6 +220,18 @@ impl Coordinates {
             x: x.into_optional_coordinate(),
             y: y.into_optional_coordinate(),
             format,
+        }
+    }
+
+    pub fn validate(self) -> Result<Self, GerberError> {
+        match (self.x, self.y) {
+            (None, None) => Err(GerberError::EmptyCoordinates),
+            (Some(x), Some(y)) => {
+                x.validate(&self.format)?;
+                y.validate(&self.format)?;
+                Ok(self)
+            }
+            _ => Ok(self),
         }
     }
 
@@ -248,6 +262,8 @@ impl_xy_partial_gerbercode!(Coordinates, "X", "Y");
 
 /// Coordinate offsets can be used for interpolate operations in circular
 /// interpolation mode.
+///
+/// It is NOT valid for both X and Y to be omitted, instead the CoordinateOffset itself should be contained in an `Option`
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CoordinateOffset {
     pub x: Option<CoordinateNumber>,
@@ -265,6 +281,18 @@ impl CoordinateOffset {
             x: x.into_optional_coordinate(),
             y: y.into_optional_coordinate(),
             format,
+        }
+    }
+
+    pub fn validate(self) -> Result<Self, GerberError> {
+        match (self.x, self.y) {
+            (None, None) => Err(GerberError::EmptyCoordinates),
+            (Some(x), Some(y)) => {
+                x.validate(&self.format)?;
+                y.validate(&self.format)?;
+                Ok(self)
+            }
+            _ => Ok(self),
         }
     }
 
@@ -523,19 +551,12 @@ mod test {
         macro_rules! assert_coords {
             ($coords:expr, $result:expr) => {{
                 assert_partial_code!($coords, $result);
+                assert!($coords.validate().is_ok());
             }};
         }
         let cf44 = CoordinateFormat::new(4, 4);
         let cf46 = CoordinateFormat::new(4, 6);
         assert_coords!(Coordinates::new(10, 20, cf44), "X100000Y200000");
-        assert_coords!(
-            Coordinates {
-                x: None,
-                y: None,
-                format: cf44
-            },
-            ""
-        ); // TODO should we catch this?
         assert_coords!(Coordinates::at_x(10, cf44), "X100000");
         assert_coords!(Coordinates::at_x(Some(10), cf44), "X100000");
         assert_coords!(Coordinates::at_y(20, cf46), "Y20000000");
@@ -545,24 +566,66 @@ mod test {
     }
 
     #[test]
+    fn invalid_coordinates() {
+        let cf44 = CoordinateFormat::new(4, 4);
+        let coordinates = Coordinates {
+            x: None,
+            y: None,
+            format: cf44,
+        };
+
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::EmptyCoordinates)
+        ));
+
+        let cf23 = CoordinateFormat::new(2, 3);
+        let bad = CoordinateNumber::try_from(100.001).unwrap();
+        let good = CoordinateNumber::try_from(99.999).unwrap();
+
+        assert!(bad.validate(&cf23).is_err());
+
+        let coordinates = Coordinates {
+            x: Some(bad),
+            y: Some(good),
+            format: cf23,
+        };
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::CoordinateFormatError(_))
+        ));
+        let coordinates = Coordinates {
+            x: Some(good),
+            y: Some(bad),
+            format: cf23,
+        };
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::CoordinateFormatError(_))
+        ));
+        let coordinates = Coordinates {
+            x: Some(bad),
+            y: Some(bad),
+            format: cf23,
+        };
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::CoordinateFormatError(_))
+        ));
+    }
+
+    #[test]
     fn test_offset() {
         macro_rules! assert_coords {
             ($coords:expr, $result:expr) => {{
                 assert_partial_code!($coords, $result);
+                assert!($coords.validate().is_ok());
             }};
         }
         let cf44 = CoordinateFormat::new(4, 4);
         let cf55 = CoordinateFormat::new(5, 5);
         let cf66 = CoordinateFormat::new(6, 6);
         assert_coords!(CoordinateOffset::new(10, 20, cf44), "I100000J200000");
-        assert_coords!(
-            CoordinateOffset {
-                x: None,
-                y: None,
-                format: cf44
-            },
-            ""
-        ); // TODO should we catch this?
         assert_coords!(CoordinateOffset::at_x(Some(10), cf66), "I10000000");
         assert_coords!(CoordinateOffset::at_x(10, cf66), "I10000000");
         assert_coords!(CoordinateOffset::at_y(Some(20), cf55), "J2000000");
@@ -572,6 +635,55 @@ mod test {
             CoordinateOffset::new(Some(0), Some(-400), cf44),
             "I0J-4000000"
         );
+    }
+
+    #[test]
+    fn invalid_offset() {
+        let cf44 = CoordinateFormat::new(4, 4);
+        let coordinates = CoordinateOffset {
+            x: None,
+            y: None,
+            format: cf44,
+        };
+
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::EmptyCoordinates)
+        ));
+
+        let cf23 = CoordinateFormat::new(2, 3);
+        let bad = CoordinateNumber::try_from(100.001).unwrap();
+        let good = CoordinateNumber::try_from(99.999).unwrap();
+
+        assert!(bad.validate(&cf23).is_err());
+
+        let coordinates = CoordinateOffset {
+            x: Some(bad),
+            y: Some(good),
+            format: cf23,
+        };
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::CoordinateFormatError(_))
+        ));
+        let coordinates = CoordinateOffset {
+            x: Some(good),
+            y: Some(bad),
+            format: cf23,
+        };
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::CoordinateFormatError(_))
+        ));
+        let coordinates = CoordinateOffset {
+            x: Some(bad),
+            y: Some(bad),
+            format: cf23,
+        };
+        assert!(matches!(
+            coordinates.validate(),
+            Err(GerberError::CoordinateFormatError(_))
+        ));
     }
 
     #[test]

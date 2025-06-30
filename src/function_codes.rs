@@ -73,11 +73,14 @@ impl<W: Write> GerberCode<W> for MCode {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Operation {
     /// D01 Command
-    Interpolate(Coordinates, Option<CoordinateOffset>),
+    /// `D01 = ['X' integer] ['Y' integer] ['I' integer 'J' integer] 'D01*';`
+    Interpolate(Option<Coordinates>, Option<CoordinateOffset>),
     /// D02 Command
-    Move(Coordinates),
+    /// `['X' integer] ['Y' integer] 'D02*';`
+    Move(Option<Coordinates>),
     /// D03 Command
-    Flash(Coordinates),
+    /// `['X' integer] ['Y' integer] 'D03*';`
+    Flash(Option<Coordinates>),
 }
 
 impl<W: Write> GerberCode<W> for Operation {
