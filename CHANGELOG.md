@@ -11,7 +11,7 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### v0.4.0 (2025-06-10) - (unreleased)
+### v0.4.0 (2025-06-30)
 
 - [added] Support for macro expressions.  See `MacroDecimal`.
 - [added] `MacroBoolean`.
@@ -28,7 +28,8 @@ Possible log types:
   using a trait to convert from integer types or optional integer types.
 - [changed] `Scoring` replaced with `VCut` to match spec.
 - [changed] Various other changes to `ApertureAttribute`, `FileFunction` and `FileAttribute` to match spec.
-- [changed] Bumped MSRV to 1.661 (due to use of 'strum'). 
+- [changed] Bumped MSRV to 1.661 (due to use of 'strum').
+- [changed] All coordinates in `Operation` are now Optional. See https://github.com/MakerPnP/gerber-types/pull/47
 - [deprecated] `*Primitive::exposure_on`, replaced with `*Primitive::with_exposure`.
 
 ### v0.3.0 (2022-07-05)
