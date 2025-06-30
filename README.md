@@ -11,7 +11,7 @@ low-level types (to be used like an AST) and code generation and does not do any
 For example, you can use an aperture without defining it. This will generate syntactically valid but semantically
 invalid Gerber code, but this module won't complain.
 
-Current Gerber X2 spec: https://www.ucamco.com/files/downloads/file/81/the_gerber_file_format_specification.pdf
+Current Gerber X2 spec: [`gerber-layer-format-specification-revision-2024-05_en.pdf`](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf)
 
 ## Example
 
