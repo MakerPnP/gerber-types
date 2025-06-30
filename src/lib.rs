@@ -115,15 +115,18 @@ mod serialization_tests {
     fn test_operation_interpolate() {
         let cf = CoordinateFormat::new(2, 5);
         let c1 = Operation::Interpolate(
-            Coordinates::new(1, 2, cf),
+            Some(Coordinates::new(1, 2, cf)),
             Some(CoordinateOffset::new(5, 10, cf)),
         );
         assert_code!(c1, "X100000Y200000I500000J1000000D01*\n");
-        let c2 = Operation::Interpolate(Coordinates::at_y(-2, CoordinateFormat::new(4, 4)), None);
+        let c2 = Operation::Interpolate(
+            Some(Coordinates::at_y(-2, CoordinateFormat::new(4, 4))),
+            None,
+        );
         assert_code!(c2, "Y-20000D01*\n");
         let cf = CoordinateFormat::new(4, 4);
         let c3 = Operation::Interpolate(
-            Coordinates::at_x(1, cf),
+            Some(Coordinates::at_x(1, cf)),
             Some(CoordinateOffset::at_y(2, cf)),
         );
         assert_code!(c3, "X10000J20000D01*\n");
@@ -131,13 +134,13 @@ mod serialization_tests {
 
     #[test]
     fn test_operation_move() {
-        let c = Operation::Move(Coordinates::new(23, 42, CoordinateFormat::new(6, 4)));
+        let c = Operation::Move(Some(Coordinates::new(23, 42, CoordinateFormat::new(6, 4))));
         assert_code!(c, "X230000Y420000D02*\n");
     }
 
     #[test]
     fn test_operation_flash() {
-        let c = Operation::Flash(Coordinates::new(23, 42, CoordinateFormat::new(4, 4)));
+        let c = Operation::Flash(Some(Coordinates::new(23, 42, CoordinateFormat::new(4, 4))));
         assert_code!(c, "X230000Y420000D03*\n");
     }
 

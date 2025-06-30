@@ -121,106 +121,117 @@ fn main() {
         .into(),
         FunctionCode::GCode(GCode::Comment("Start image generation".to_string())).into(),
         FunctionCode::DCode(DCode::SelectAperture(10)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             0,
             CoordinateNumber::try_from(0.25).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::GCode(GCode::InterpolationMode(InterpolationMode::Linear)).into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(0, 0, cf),
+            Some(Coordinates::new(0, 0, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(CoordinateNumber::try_from(0.25).unwrap(), 0, cf),
+            Some(Coordinates::new(
+                CoordinateNumber::try_from(0.25).unwrap(),
+                0,
+                cf,
+            )),
             None,
         )))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             1, 1, cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(CoordinateNumber::try_from(1.5).unwrap(), cf),
+            Some(Coordinates::at_x(
+                CoordinateNumber::try_from(1.5).unwrap(),
+                cf,
+            )),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(2, CoordinateNumber::try_from(1.5).unwrap(), cf),
+            Some(Coordinates::new(
+                2,
+                CoordinateNumber::try_from(1.5).unwrap(),
+                cf,
+            )),
             None,
         )))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::at_x(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::at_x(
             CoordinateNumber::try_from(2.5).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(1, cf),
+            Some(Coordinates::at_y(1, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(11)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             1, 1, cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             2, 1, cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(2.5).unwrap(),
             1,
             cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(2.5).unwrap(),
             CoordinateNumber::try_from(1.5).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             2,
             CoordinateNumber::try_from(1.5).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(12)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             1,
             CoordinateNumber::try_from(1.5).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(13)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             3,
             CoordinateNumber::try_from(1.5).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(14)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             3,
             CoordinateNumber::try_from(1.25).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(15)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             3, 1, cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(10)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             CoordinateNumber::try_from(3.75).unwrap(),
             1,
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::GCode(GCode::QuadrantMode(QuadrantMode::Multi)).into(),
         FunctionCode::GCode(GCode::InterpolationMode(
@@ -228,7 +239,11 @@ fn main() {
         ))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(CoordinateNumber::try_from(3.75).unwrap(), 1, cf),
+            Some(Coordinates::new(
+                CoordinateNumber::try_from(3.75).unwrap(),
+                1,
+                cf,
+            )),
             Some(CoordinateOffset::new(
                 CoordinateNumber::try_from(0.25).unwrap(),
                 0,
@@ -237,71 +252,80 @@ fn main() {
         )))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(16)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(3.4).unwrap(),
             1,
             cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(3.5).unwrap(),
             CoordinateNumber::try_from(0.9).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(10)).into(),
         FunctionCode::GCode(GCode::RegionMode(true)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             CoordinateNumber::try_from(0.5).unwrap(),
             2,
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::GCode(GCode::InterpolationMode(InterpolationMode::Linear)).into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(CoordinateNumber::try_from(3.75).unwrap(), cf),
+            Some(Coordinates::at_y(
+                CoordinateNumber::try_from(3.75).unwrap(),
+                cf,
+            )),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(CoordinateNumber::try_from(3.75).unwrap(), cf),
+            Some(Coordinates::at_x(
+                CoordinateNumber::try_from(3.75).unwrap(),
+                cf,
+            )),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(2, cf),
+            Some(Coordinates::at_y(2, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(CoordinateNumber::try_from(0.5).unwrap(), cf),
+            Some(Coordinates::at_x(
+                CoordinateNumber::try_from(0.5).unwrap(),
+                cf,
+            )),
             None,
         )))
         .into(),
         FunctionCode::GCode(GCode::RegionMode(false)).into(),
         FunctionCode::DCode(DCode::SelectAperture(18)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             0,
             CoordinateNumber::try_from(3.875).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(3.875).unwrap(),
             CoordinateNumber::try_from(3.875).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         ExtendedCode::LoadPolarity(Polarity::Clear).into(),
         FunctionCode::GCode(GCode::RegionMode(true)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             1,
             CoordinateNumber::try_from(2.5).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(3, cf),
+            Some(Coordinates::at_y(3, cf)),
             None,
         )))
         .into(),
@@ -311,11 +335,11 @@ fn main() {
         ))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(
+            Some(Coordinates::new(
                 CoordinateNumber::try_from(1.25).unwrap(),
                 CoordinateNumber::try_from(3.25).unwrap(),
                 cf,
-            ),
+            )),
             Some(CoordinateOffset::new(
                 CoordinateNumber::try_from(0.25).unwrap(),
                 0,
@@ -325,7 +349,7 @@ fn main() {
         .into(),
         FunctionCode::GCode(GCode::InterpolationMode(InterpolationMode::Linear)).into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(3, cf),
+            Some(Coordinates::at_x(3, cf)),
             None,
         )))
         .into(),
@@ -335,7 +359,11 @@ fn main() {
         ))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(3, CoordinateNumber::try_from(2.5).unwrap(), cf),
+            Some(Coordinates::new(
+                3,
+                CoordinateNumber::try_from(2.5).unwrap(),
+                cf,
+            )),
             Some(CoordinateOffset::new(
                 0,
                 CoordinateNumber::try_from(0.375).unwrap(),
@@ -345,38 +373,41 @@ fn main() {
         .into(),
         FunctionCode::GCode(GCode::InterpolationMode(InterpolationMode::Linear)).into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(1, cf),
+            Some(Coordinates::at_x(1, cf)),
             None,
         )))
         .into(),
         FunctionCode::GCode(GCode::RegionMode(false)).into(),
         ExtendedCode::LoadPolarity(Polarity::Dark).into(),
         FunctionCode::DCode(DCode::SelectAperture(10)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             CoordinateNumber::try_from(1.5).unwrap(),
             CoordinateNumber::try_from(2.875).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(2, cf),
+            Some(Coordinates::at_x(2, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(11)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(1.5).unwrap(),
             CoordinateNumber::try_from(2.875).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::at_x(2, cf)))).into(),
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::at_x(
+            2, cf,
+        )))))
+        .into(),
         FunctionCode::DCode(DCode::SelectAperture(19)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Flash(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Flash(Some(Coordinates::new(
             CoordinateNumber::try_from(2.875).unwrap(),
             CoordinateNumber::try_from(2.875).unwrap(),
             cf,
-        ))))
+        )))))
         .into(),
         ExtendedCode::FileAttribute(FileAttribute::Md5(
             "6ab9e892830469cdff7e3e346331d404".to_string(),

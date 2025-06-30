@@ -34,49 +34,52 @@ fn main() {
         })
         .into(),
         FunctionCode::DCode(DCode::SelectAperture(10)).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::new(
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             0, 0, cf,
-        ))))
+        )))))
         .into(),
         FunctionCode::GCode(GCode::InterpolationMode(InterpolationMode::Linear)).into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::new(5, 0, cf),
+            Some(Coordinates::new(5, 0, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(5, cf),
+            Some(Coordinates::at_y(5, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(0, cf),
+            Some(Coordinates::at_x(0, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(0, cf),
+            Some(Coordinates::at_y(0, cf)),
             None,
         )))
         .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Move(Coordinates::at_x(6, cf)))).into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(11, cf),
-            None,
-        )))
+        FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::at_x(
+            6, cf,
+        )))))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(5, cf),
-            None,
-        )))
-        .into(),
-        FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_x(6, cf),
+            Some(Coordinates::at_x(11, cf)),
             None,
         )))
         .into(),
         FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
-            Coordinates::at_y(0, cf),
+            Some(Coordinates::at_y(5, cf)),
+            None,
+        )))
+        .into(),
+        FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
+            Some(Coordinates::at_x(6, cf)),
+            None,
+        )))
+        .into(),
+        FunctionCode::DCode(DCode::Operation(Operation::Interpolate(
+            Some(Coordinates::at_y(0, cf)),
             None,
         )))
         .into(),
