@@ -129,6 +129,36 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
                 oa.serialize_partial(writer)?;
                 writeln!(writer, "*%")?;
             }
+            ExtendedCode::MirrorImage(ref mi) => {
+                write!(writer, "%MI")?;
+                mi.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::OffsetImage(ref of) => {
+                write!(writer, "%OF")?;
+                of.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::ScaleImage(ref sf) => {
+                write!(writer, "%SF")?;
+                sf.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::RotateImage(ref ir) => {
+                write!(writer, "%IR")?;
+                ir.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::ImagePolarity(ref ip) => {
+                write!(writer, "%IP")?;
+                ip.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
+            ExtendedCode::AxisSelect(ref r#as) => {
+                write!(writer, "%AS")?;
+                r#as.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
         };
         Ok(())
     }

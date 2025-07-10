@@ -11,6 +11,10 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### v0.5.0 (unreleased)
+
+- [added] Support for legacy/deprecated gerber commands: `IP`, `MI`, `SF`, `OF`, `IR`, and `AS`.
+
 ### v0.4.0 (2025-06-30)
 
 - [added] Support for macro expressions.  See `MacroDecimal`.

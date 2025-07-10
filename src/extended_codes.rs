@@ -396,3 +396,109 @@ mod test {
         assert_eq!(map.len(), 2);
     }
 }
+
+// Image Mirroring
+
+/// Gerber spec 2024.05 8.1.7 "Mirror Image (MI)"
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
+pub enum ImageMirroring {
+    #[strum(serialize = "")]
+    None,
+    #[strum(serialize = "A1")]
+    A,
+    #[strum(serialize = "B1")]
+    B,
+    #[strum(serialize = "A1B1")]
+    AB,
+}
+
+impl_partial_gerber_code_via_strum!(ImageMirroring);
+
+// Image Rotation
+
+/// Gerber spec 2024.05 8.1.5 "Image Rotation (IR)"
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
+#[allow(non_camel_case_types)]
+pub enum ImageRotation {
+    #[strum(serialize = "0")]
+    None,
+    #[strum(serialize = "90")]
+    CCW_90,
+    #[strum(serialize = "180")]
+    CCW_180,
+    #[strum(serialize = "270")]
+    CCW_270,
+}
+
+impl_partial_gerber_code_via_strum!(ImageRotation);
+
+// Image Scaling
+
+/// Gerber spec 2024.05 8.1.9 "Scale Factor (SF)"
+/// By default, A=X, B=Y, but this changes depending on the axis select command (AS)
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ImageScaling {
+    /// scale factor for A axis
+    pub a: f64,
+    /// scale factor for B axis
+    pub b: f64,
+}
+
+impl<W: Write> PartialGerberCode<W> for ImageScaling {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        if self.a != 0.0 {
+            write!(writer, "A{}", self.a)?;
+        }
+        if self.b != 0.0 {
+            write!(writer, "B{}", self.b)?;
+        }
+        Ok(())
+    }
+}
+
+// Image Offset
+
+/// Gerber spec 2024.05 8.1.8 "Offset (OF)"
+/// By default, A=X, B=Y, but this changes depending on the axis select command (AS)
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ImageOffset {
+    /// offset for A axis
+    pub a: f64,
+    /// offset for B axis
+    pub b: f64,
+}
+
+impl<W: Write> PartialGerberCode<W> for ImageOffset {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        if self.a != 0.0 {
+            write!(writer, "A{}", self.a)?;
+        }
+        if self.b != 0.0 {
+            write!(writer, "B{}", self.b)?;
+        }
+        Ok(())
+    }
+}
+
+// Axis Select
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
+#[strum(serialize_all = "UPPERCASE")]
+pub enum AxisSelect {
+    AXBY,
+    AYBX,
+}
+
+impl_partial_gerber_code_via_strum!(AxisSelect);
+
+// Image Polarity
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
+pub enum ImagePolarity {
+    #[strum(serialize = "POS")]
+    Positive,
+    #[strum(serialize = "NEG")]
+    Negative,
+}
+
+impl_partial_gerber_code_via_strum!(ImagePolarity);

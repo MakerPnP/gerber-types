@@ -92,6 +92,18 @@ pub enum ExtendedCode {
     ApertureAttribute(attributes::ApertureAttribute),
     /// TD
     DeleteAttribute(String),
+    /// MI (deprecated in Gerber spec since December 2012)
+    MirrorImage(extended_codes::ImageMirroring),
+    /// OF (deprecated in Gerber spec since December 2012)
+    OffsetImage(extended_codes::ImageOffset),
+    /// SF (deprecated in Gerber spec since December 2012)
+    ScaleImage(extended_codes::ImageScaling),
+    /// IR (deprecated in Gerber spec since December 2012)
+    RotateImage(extended_codes::ImageRotation),
+    /// IP (deprecated in gerber spec since December 2012)
+    ImagePolarity(extended_codes::ImagePolarity),
+    /// AS (deprecated in gerber spec since December 2012)
+    AxisSelect(extended_codes::AxisSelect),
 }
 
 impl_from!(

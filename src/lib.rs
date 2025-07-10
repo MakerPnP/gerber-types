@@ -1476,4 +1476,86 @@ mod serialization_tests {
             }
         }
     }
+
+    #[test]
+    fn test_mirror_image() {
+        let value = ExtendedCode::MirrorImage(ImageMirroring::None);
+        assert_code!(value, "%MI*%\n");
+        let value = ExtendedCode::MirrorImage(ImageMirroring::A);
+        assert_code!(value, "%MIA1*%\n");
+        let value = ExtendedCode::MirrorImage(ImageMirroring::B);
+        assert_code!(value, "%MIB1*%\n");
+        let value = ExtendedCode::MirrorImage(ImageMirroring::AB);
+        assert_code!(value, "%MIA1B1*%\n");
+    }
+
+    #[test]
+    fn test_offset_image() {
+        let value = ExtendedCode::OffsetImage(ImageOffset { a: 0.0, b: 0.0 });
+        assert_code!(value, "%OF*%\n");
+        let value = ExtendedCode::OffsetImage(ImageOffset {
+            a: 99999.99999,
+            b: 0.0,
+        });
+        assert_code!(value, "%OFA99999.99999*%\n");
+        let value = ExtendedCode::OffsetImage(ImageOffset {
+            a: 0.0,
+            b: 99999.99999,
+        });
+        assert_code!(value, "%OFB99999.99999*%\n");
+        let value = ExtendedCode::OffsetImage(ImageOffset {
+            a: -99999.99999,
+            b: -99999.99999,
+        });
+        assert_code!(value, "%OFA-99999.99999B-99999.99999*%\n");
+    }
+
+    #[test]
+    fn test_scale_image() {
+        let value = ExtendedCode::ScaleImage(ImageScaling { a: 0.0, b: 0.0 });
+        assert_code!(value, "%SF*%\n");
+        let value = ExtendedCode::ScaleImage(ImageScaling {
+            a: 999.99999,
+            b: 0.0,
+        });
+        assert_code!(value, "%SFA999.99999*%\n");
+        let value = ExtendedCode::ScaleImage(ImageScaling {
+            a: 0.0,
+            b: 999.99999,
+        });
+        assert_code!(value, "%SFB999.99999*%\n");
+        let value = ExtendedCode::ScaleImage(ImageScaling {
+            a: -999.99999,
+            b: -999.99999,
+        });
+        assert_code!(value, "%SFA-999.99999B-999.99999*%\n");
+    }
+
+    #[test]
+    fn test_rotate_image() {
+        let value = ExtendedCode::RotateImage(ImageRotation::None);
+        assert_code!(value, "%IR0*%\n");
+        let value = ExtendedCode::RotateImage(ImageRotation::CCW_90);
+        assert_code!(value, "%IR90*%\n");
+        let value = ExtendedCode::RotateImage(ImageRotation::CCW_180);
+        assert_code!(value, "%IR180*%\n");
+        let value = ExtendedCode::RotateImage(ImageRotation::CCW_270);
+        assert_code!(value, "%IR270*%\n");
+    }
+
+    #[test]
+    fn test_image_polarity() {
+        let value = ExtendedCode::ImagePolarity(ImagePolarity::Positive);
+        assert_code!(value, "%IPPOS*%\n");
+        let value = ExtendedCode::ImagePolarity(ImagePolarity::Negative);
+        assert_code!(value, "%IPNEG*%\n");
+    }
+
+    #[test]
+    fn test_axis_select() {
+        let value = ExtendedCode::AxisSelect(AxisSelect::AXBY);
+        assert_code!(value, "%ASAXBY*%\n");
+        let value = ExtendedCode::AxisSelect(AxisSelect::AYBX);
+        assert_code!(value, "%ASAYBX*%\n");
+    }
 }
