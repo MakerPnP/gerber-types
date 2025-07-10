@@ -11,7 +11,7 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### v0.5.0 (unreleased)
+### v0.5.0 (2025-07-10)
 
 - [added] Support for legacy/deprecated gerber commands: `IP`, `MI`, `SF`, `OF`, `IR`, and `AS`.
 
