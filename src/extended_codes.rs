@@ -414,6 +414,12 @@ pub enum ImageMirroring {
 
 impl_partial_gerber_code_via_strum!(ImageMirroring);
 
+impl Default for ImageMirroring {
+    fn default() -> Self {
+        ImageMirroring::None
+    }
+}
+
 // Image Rotation
 
 /// Gerber spec 2024.05 8.1.5 "Image Rotation (IR)"
@@ -432,6 +438,11 @@ pub enum ImageRotation {
 
 impl_partial_gerber_code_via_strum!(ImageRotation);
 
+impl Default for ImageRotation {
+    fn default() -> Self {
+        ImageRotation::None
+    }
+}
 // Image Scaling
 
 /// Gerber spec 2024.05 8.1.9 "Scale Factor (SF)"
@@ -456,11 +467,17 @@ impl<W: Write> PartialGerberCode<W> for ImageScaling {
     }
 }
 
+impl Default for ImageScaling {
+    fn default() -> Self {
+        ImageScaling { a: 1.0, b: 1.0 }
+    }
+}
+
 // Image Offset
 
 /// Gerber spec 2024.05 8.1.8 "Offset (OF)"
 /// By default, A=X, B=Y, but this changes depending on the axis select command (AS)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct ImageOffset {
     /// offset for A axis
     pub a: f64,
@@ -491,6 +508,12 @@ pub enum AxisSelect {
 
 impl_partial_gerber_code_via_strum!(AxisSelect);
 
+impl Default for AxisSelect {
+    fn default() -> Self {
+        AxisSelect::AXBY
+    }
+}
+
 // Image Polarity
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, IntoStaticStr, VariantNames, VariantArray)]
@@ -502,3 +525,9 @@ pub enum ImagePolarity {
 }
 
 impl_partial_gerber_code_via_strum!(ImagePolarity);
+
+impl Default for ImagePolarity {
+    fn default() -> Self {
+        ImagePolarity::Positive
+    }
+}
