@@ -1,10 +1,10 @@
 //! Function code types.
 
-use std::io::Write;
-
+use crate::attributes;
 use crate::coordinates::{CoordinateOffset, Coordinates};
 use crate::errors::GerberResult;
 use crate::traits::{GerberCode, PartialGerberCode};
+use std::io::Write;
 
 // DCode
 
@@ -26,12 +26,12 @@ impl<W: Write> GerberCode<W> for DCode {
 
 // GCode
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum GCode {
     InterpolationMode(InterpolationMode),
     RegionMode(bool),
     QuadrantMode(QuadrantMode),
-    Comment(String),
+    Comment(CommentContent),
 }
 
 impl<W: Write> GerberCode<W> for GCode {
@@ -46,8 +46,72 @@ impl<W: Write> GerberCode<W> for GCode {
                 }
             }
             GCode::QuadrantMode(ref mode) => mode.serialize(writer)?,
-            GCode::Comment(ref comment) => writeln!(writer, "G04 {}*", comment)?,
+            GCode::Comment(ref content) => {
+                write!(writer, "G04 ")?;
+                content.serialize_partial(writer)?;
+                writeln!(writer, "*")?;
+            }
         };
+        Ok(())
+    }
+}
+
+/// See Gerber spec 2024.05.
+/// 1) 4.1 - Comment (G04)
+/// 2) 5.1.1 - Comment attributes
+#[derive(Debug, Clone, PartialEq)]
+pub enum CommentContent {
+    String(String),
+    /// "Content starting with ”#@!“ is reserved for standard comments. The purpose of standard
+    ///  comments is to add meta-information in a formally defined manner, without affecting image
+    ///  generation. They can only be used if defined in this specification"
+    Standard(StandardComment),
+}
+
+impl<W: Write> PartialGerberCode<W> for CommentContent {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match *self {
+            CommentContent::String(ref string) => {
+                write!(writer, "{}", string)?;
+            }
+            CommentContent::Standard(ref standard) => {
+                standard.serialize_partial(writer)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+/// See Gerber spec 2024.05.
+/// 1) 4.1 - Comment (G04)
+/// 2) 5.1.1 - Comment attributes
+#[derive(Debug, Clone, PartialEq)]
+pub enum StandardComment {
+    /// TF
+    FileAttribute(attributes::FileAttribute),
+    /// TO
+    ObjectAttribute(attributes::ObjectAttribute),
+    /// TA
+    ApertureAttribute(attributes::ApertureAttribute),
+}
+
+impl<W: Write> PartialGerberCode<W> for StandardComment {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(writer, "#@! ")?;
+        match *self {
+            StandardComment::FileAttribute(ref fa) => {
+                write!(writer, "TF")?;
+                fa.serialize_partial(writer)?;
+            }
+            StandardComment::ObjectAttribute(ref oa) => {
+                write!(writer, "TO")?;
+                oa.serialize_partial(writer)?;
+            }
+            StandardComment::ApertureAttribute(ref aa) => {
+                write!(writer, "TA")?;
+                aa.serialize_partial(writer)?;
+            }
+        }
         Ok(())
     }
 }
