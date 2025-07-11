@@ -159,6 +159,11 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
                 r#as.serialize_partial(writer)?;
                 writeln!(writer, "*%")?;
             }
+            ExtendedCode::ImageName(ref r#in) => {
+                write!(writer, "%IN")?;
+                r#in.serialize_partial(writer)?;
+                writeln!(writer, "*%")?;
+            }
         };
         Ok(())
     }

@@ -1614,4 +1614,12 @@ mod serialization_tests {
         let value = ExtendedCode::AxisSelect(AxisSelect::AYBX);
         assert_code!(value, "%ASAYBX*%\n");
     }
+
+    #[test]
+    fn test_image_name() {
+        let value = ExtendedCode::ImageName(ImageName {
+            name: "PANEL_1".to_string(),
+        });
+        assert_code!(value, "%INPANEL_1*%\n");
+    }
 }
