@@ -57,23 +57,79 @@ mod serialization_tests {
     #[test]
     fn test_comment() {
         //! The serialize method of the GerberCode trait should generate strings.
-        let comment = GCode::Comment("testcomment".to_string());
+        let comment = GCode::Comment(CommentContent::String("testcomment".to_string()));
         assert_code!(comment, "G04 testcomment*\n");
+    }
+
+    /// `standard comment` is a term defined in the gerber spec. See `2024.05 4.1 Comment (G04)`
+    #[test]
+    fn test_standard_comment_with_standard_attributes() {
+        //! Attributes should be able to be stored in G04 comments starting with `#@!`
+        let comment = GCode::Comment(CommentContent::Standard(
+            StandardComment::ApertureAttribute(ApertureAttribute::ApertureFunction(
+                ApertureFunction::SmdPad(SmdPadType::CopperDefined),
+            )),
+        ));
+        assert_code!(comment, "G04 #@! TA.AperFunction,SMDPad,CuDef*\n");
+
+        let comment = GCode::Comment(CommentContent::Standard(StandardComment::FileAttribute(
+            FileAttribute::FileFunction(FileFunction::Profile(Some(Profile::NonPlated))),
+        )));
+        assert_code!(comment, "G04 #@! TF.FileFunction,Profile,NP*\n");
+
+        let comment = GCode::Comment(CommentContent::Standard(StandardComment::ObjectAttribute(
+            ObjectAttribute::Component("R1".to_string()),
+        )));
+        assert_code!(comment, "G04 #@! TO.C,R1*\n");
+    }
+
+    #[test]
+    fn test_standard_comment_with_custom_attributes() {
+        // custom attributes are not prefixed with a `.`.
+        let comment = GCode::Comment(CommentContent::Standard(
+            StandardComment::ApertureAttribute(ApertureAttribute::UserDefined {
+                name: "Example".to_string(),
+                values: vec!["value1".to_string(), "value2".to_string()],
+            }),
+        ));
+        assert_code!(comment, "G04 #@! TAExample,value1,value2*\n");
+
+        let comment = GCode::Comment(CommentContent::Standard(StandardComment::FileAttribute(
+            FileAttribute::UserDefined {
+                name: "Example".to_string(),
+                values: vec!["value1".to_string(), "value2".to_string()],
+            },
+        )));
+        assert_code!(comment, "G04 #@! TFExample,value1,value2*\n");
+
+        let comment = GCode::Comment(CommentContent::Standard(StandardComment::ObjectAttribute(
+            ObjectAttribute::UserDefined {
+                name: "Example".to_string(),
+                values: vec!["value1".to_string(), "value2".to_string()],
+            },
+        )));
+        assert_code!(comment, "G04 #@! TOExample,value1,value2*\n");
     }
 
     #[test]
     fn test_vec_of_comments() {
         //! A `Vec<T: GerberCode>` should also implement `GerberCode`.
         let mut v = Vec::new();
-        v.push(GCode::Comment("comment 1".to_string()));
-        v.push(GCode::Comment("another one".to_string()));
+        v.push(GCode::Comment(CommentContent::String(
+            "comment 1".to_string(),
+        )));
+        v.push(GCode::Comment(CommentContent::String(
+            "another one".to_string(),
+        )));
         assert_code!(v, "G04 comment 1*\nG04 another one*\n");
     }
 
     #[test]
     fn test_single_command() {
         //! A `Command` should implement `GerberCode`
-        let c = Command::FunctionCode(FunctionCode::GCode(GCode::Comment("comment".to_string())));
+        let c = Command::FunctionCode(FunctionCode::GCode(GCode::Comment(CommentContent::String(
+            "comment".to_string(),
+        ))));
         assert_code!(c, "G04 comment*\n");
     }
 

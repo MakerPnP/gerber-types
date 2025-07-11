@@ -47,7 +47,7 @@ macro_rules! impl_command_fromfrom {
 
 // Main categories
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum FunctionCode {
     DCode(function_codes::DCode),
     GCode(function_codes::GCode),
@@ -185,26 +185,30 @@ mod test {
     use crate::extended_codes::Polarity;
     use crate::function_codes::GCode;
     use crate::traits::GerberCode;
-    use crate::{ApertureBlock, Mirroring, Rotation, Scaling, StepAndRepeat};
+    use crate::{ApertureBlock, CommentContent, Mirroring, Rotation, Scaling, StepAndRepeat};
 
     #[test]
     fn test_debug() {
         //! The debug representation should work properly.
-        let c = Command::FunctionCode(FunctionCode::GCode(GCode::Comment("test".to_string())));
+        let c = Command::FunctionCode(FunctionCode::GCode(GCode::Comment(CommentContent::String(
+            "test".to_string(),
+        ))));
         let debug = format!("{:?}", c);
-        assert_eq!(debug, "FunctionCode(GCode(Comment(\"test\")))");
+        assert_eq!(debug, "FunctionCode(GCode(Comment(String(\"test\"))))");
     }
 
     #[test]
     fn test_function_code_serialize() {
         //! A `FunctionCode` should implement `GerberCode`
-        let c = FunctionCode::GCode(GCode::Comment("comment".to_string()));
+        let c = FunctionCode::GCode(GCode::Comment(CommentContent::String(
+            "comment".to_string(),
+        )));
         assert_code!(c, "G04 comment*\n");
     }
 
     #[test]
     fn test_function_code_from_gcode() {
-        let comment = GCode::Comment("hello".into());
+        let comment = GCode::Comment(CommentContent::String("hello".into()));
         let f1: FunctionCode = FunctionCode::GCode(comment.clone());
         let f2: FunctionCode = comment.into();
         assert_eq!(f1, f2);
@@ -212,7 +216,7 @@ mod test {
 
     #[test]
     fn test_command_from_function_code() {
-        let comment = FunctionCode::GCode(GCode::Comment("hello".into()));
+        let comment = FunctionCode::GCode(GCode::Comment(CommentContent::String("hello".into())));
         let c1: Command = Command::FunctionCode(comment.clone());
         let c2: Command = comment.into();
         assert_eq!(c1, c2);

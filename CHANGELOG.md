@@ -11,6 +11,18 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### v0.6.0 (2025-07-10)
+
+- [added] Added support for G04 'standard comments' where comment attributes are placed in G04 commands.
+  e.g. 'G04 #@! TA.AperFunction,SMDPad,CuDef*'
+  This means that when you're looking for attributes, you now have to look in two places:
+  1) `Command::ExtendedCode(ExtendedCode::[FileAttribute|ObjectAttribute|ApertureAttribute])` and 
+  2) `Command::FunctionCode(FunctionCode::GCode(GCode::Comment(CommentContent::Standard(StandardComment::[FileAttribute|ObjectAttribute|ApertureAttribute]))))`
+  It also means when you're making/serializing gerber files you need to choose where to put the attributes.
+  Refer to Gerber spec 2024.05 - "4.1 Comment (G04)" and "5.1.1 Comment attributes".
+  Unfortunately, in 2025, manufacturing files containing comment attributes are still widespread.
+- [changed] Removed 'Eq' from `FunctionCode`, due to use of `f64` in attributes (`ExtendedCode` wasn't `Eq` either)
+
 ### v0.5.0 (2025-07-10)
 
 - [added] Support for legacy/deprecated gerber commands: `IP`, `MI`, `SF`, `OF`, `IR`, and `AS`.

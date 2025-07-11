@@ -11,7 +11,10 @@ const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 fn main() {
     let cf = CoordinateFormat::new(2, 6);
     let commands: Vec<Command> = vec![
-        FunctionCode::GCode(GCode::Comment("Ucamco ex. 2: Shapes".to_string())).into(),
+        FunctionCode::GCode(GCode::Comment(CommentContent::String(
+            "Ucamco ex. 2: Shapes".to_string(),
+        )))
+        .into(),
         ExtendedCode::CoordinateFormat(cf).into(),
         ExtendedCode::Unit(Unit::Inches).into(),
         ExtendedCode::FileAttribute(FileAttribute::GenerationSoftware(GenerationSoftware::new(
@@ -25,7 +28,10 @@ fn main() {
         )))
         .into(),
         ExtendedCode::LoadPolarity(Polarity::Dark).into(),
-        FunctionCode::GCode(GCode::Comment("Define Apertures".to_string())).into(),
+        FunctionCode::GCode(GCode::Comment(CommentContent::String(
+            "Define Apertures".to_string(),
+        )))
+        .into(),
         ExtendedCode::ApertureMacro(ApertureMacro::new("TARGET125").add_content(MoirePrimitive {
             center: (0.0.into(), 0.0.into()),
             diameter: 0.125.into(),
@@ -119,7 +125,10 @@ fn main() {
             aperture: Aperture::Macro("THERMAL80".to_string(), None),
         })
         .into(),
-        FunctionCode::GCode(GCode::Comment("Start image generation".to_string())).into(),
+        FunctionCode::GCode(GCode::Comment(CommentContent::String(
+            "Start image generation".to_string(),
+        )))
+        .into(),
         FunctionCode::DCode(DCode::SelectAperture(10)).into(),
         FunctionCode::DCode(DCode::Operation(Operation::Move(Some(Coordinates::new(
             0,
