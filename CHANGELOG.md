@@ -11,7 +11,7 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### v0.6.0 (2025-07-10)
+### v0.6.0 (2025-07-11)
 
 - [added] Added support for G04 'standard comments' where comment attributes are placed in G04 commands.
   e.g. 'G04 #@! TA.AperFunction,SMDPad,CuDef*'
