@@ -104,6 +104,8 @@ pub enum ExtendedCode {
     ImagePolarity(extended_codes::ImagePolarity),
     /// AS (deprecated in gerber spec since December 2012)
     AxisSelect(extended_codes::AxisSelect),
+    /// IN (deprecated in gerber spec since October 2013)
+    ImageName(extended_codes::ImageName),
 }
 
 impl_from!(

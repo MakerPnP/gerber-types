@@ -21,6 +21,7 @@ Possible log types:
   It also means when you're making/serializing gerber files you need to choose where to put the attributes.
   Refer to Gerber spec 2024.05 - "4.1 Comment (G04)" and "5.1.1 Comment attributes".
   Unfortunately, in 2025, manufacturing files containing comment attributes are still widespread.
+- [added] Added support for `IN` (ImageName) command.
 - [changed] Removed 'Eq' from `FunctionCode`, due to use of `f64` in attributes (`ExtendedCode` wasn't `Eq` either)
 
 ### v0.5.0 (2025-07-10)

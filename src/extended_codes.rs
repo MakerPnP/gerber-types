@@ -531,3 +531,17 @@ impl Default for ImagePolarity {
         ImagePolarity::Positive
     }
 }
+
+/// Gerber spec 2024.05 8.1.9 "Scale Factor (SF)"
+/// By default, A=X, B=Y, but this changes depending on the axis select command (AS)
+#[derive(Debug, Clone, PartialEq)]
+pub struct ImageName {
+    pub name: String,
+}
+
+impl<W: Write> PartialGerberCode<W> for ImageName {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        write!(writer, "{}", self.name)?;
+        Ok(())
+    }
+}
