@@ -169,18 +169,21 @@ mod serialization_tests {
 
     #[test]
     fn test_operation_interpolate() {
-        let cf = CoordinateFormat::new(2, 5);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 5);
         let c1 = Operation::Interpolate(
             Some(Coordinates::new(1, 2, cf)),
             Some(CoordinateOffset::new(5, 10, cf)),
         );
         assert_code!(c1, "X100000Y200000I500000J1000000D01*\n");
         let c2 = Operation::Interpolate(
-            Some(Coordinates::at_y(-2, CoordinateFormat::new(4, 4))),
+            Some(Coordinates::at_y(
+                -2,
+                CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4),
+            )),
             None,
         );
         assert_code!(c2, "Y-20000D01*\n");
-        let cf = CoordinateFormat::new(4, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4);
         let c3 = Operation::Interpolate(
             Some(Coordinates::at_x(1, cf)),
             Some(CoordinateOffset::at_y(2, cf)),
@@ -190,13 +193,21 @@ mod serialization_tests {
 
     #[test]
     fn test_operation_move() {
-        let c = Operation::Move(Some(Coordinates::new(23, 42, CoordinateFormat::new(6, 4))));
+        let c = Operation::Move(Some(Coordinates::new(
+            23,
+            42,
+            CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 6, 4),
+        )));
         assert_code!(c, "X230000Y420000D02*\n");
     }
 
     #[test]
     fn test_operation_flash() {
-        let c = Operation::Flash(Some(Coordinates::new(23, 42, CoordinateFormat::new(4, 4))));
+        let c = Operation::Flash(Some(Coordinates::new(
+            23,
+            42,
+            CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4),
+        )));
         assert_code!(c, "X230000Y420000D03*\n");
     }
 
@@ -209,9 +220,25 @@ mod serialization_tests {
     }
 
     #[test]
-    fn test_coordinate_format() {
-        let c = ExtendedCode::CoordinateFormat(CoordinateFormat::new(2, 5));
+    fn test_coordinate_format_tz() {
+        let c = ExtendedCode::CoordinateFormat(CoordinateFormat::new(
+            ZeroOmission::Leading,
+            CoordinateMode::Absolute,
+            2,
+            5,
+        ));
         assert_code!(c, "%FSLAX25Y25*%\n");
+    }
+
+    #[test]
+    fn test_coordinate_format_lz() {
+        let c = ExtendedCode::CoordinateFormat(CoordinateFormat::new(
+            ZeroOmission::Trailing,
+            CoordinateMode::Incremental,
+            2,
+            5,
+        ));
+        assert_code!(c, "%FSTIX25Y25*%\n");
     }
 
     #[test]

@@ -32,20 +32,58 @@ macro_rules! impl_xy_partial_gerbercode {
 
 // Types
 
-/// The coordinate format specifies the number of integer and decimal places in
+/// Coordinate mode specifies whether coordinates are absolute or incremental.
+/// It is set by the FS and G90/G91 commands.
+/// Absolute coordinates are the most common.
+///
+/// Note: This is deprecated since revision I1 from December 2012 of the Gerber
+/// format specification, but still used.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum CoordinateMode {
+    Absolute,
+    Incremental,
+}
+
+/// Zero omission specifies whether leading or trailing zeros are omitted in
+/// coordinate numbers. It is set by the FS command.
+/// Leading zero omission is the most common.
+///
+/// Note: This is deprecated since revision 2015.06 of the Gerber format
+/// specification, but still used.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ZeroOmission {
+    Leading,
+    Trailing,
+}
+
+/// The coordinate format specifies the format of the following coordinates in
+/// the file. It is set by the FS command.
+/// The number represents integer and decimal places in
 /// a coordinate number. For example, the `24` format specifies 2 integer and 4
 /// decimal places. The number of decimal places must be 4, 5 or 6. The number
 /// of integer places must be not more than 6. Thus the longest representable
 /// coordinate number is `nnnnnn.nnnnnn`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct CoordinateFormat {
+    pub zero_omission: ZeroOmission,
+    pub coordinate_mode: CoordinateMode,
     pub integer: u8,
     pub decimal: u8,
 }
 
 impl CoordinateFormat {
-    pub fn new(integer: u8, decimal: u8) -> Self {
-        CoordinateFormat { integer, decimal }
+    pub fn new(
+        zero_omission: ZeroOmission,
+        coordinate_mode: CoordinateMode,
+        integer: u8,
+        decimal: u8,
+    ) -> Self {
+        CoordinateFormat {
+            zero_omission,
+            coordinate_mode,
+            integer,
+            decimal,
+        }
     }
 }
 
@@ -177,9 +215,27 @@ impl CoordinateNumber {
     pub fn gerber(&self, format: &CoordinateFormat) -> Result<String, GerberError> {
         self.validate(format)?;
 
+        if self.nano == 0 {
+            return Ok("0".to_string());
+        }
         let divisor: i64 = 10_i64.pow((DECIMAL_PLACES_CHARS - format.decimal) as u32);
         let number: i64 = Ratio::new(self.nano, divisor).round().to_integer();
-        Ok(number.to_string())
+        match &format.zero_omission {
+            ZeroOmission::Leading => Ok(number.to_string()),
+            ZeroOmission::Trailing => {
+                let len = format.integer + format.decimal;
+                let num_str = number.abs().to_string();
+                // Prefix leading zeros if necessary and trim trailing zeros
+                Ok(format!(
+                    "{}{}{}",
+                    if number.is_negative() { "-" } else { "" },
+                    "0".repeat(len as usize - num_str.len()),
+                    num_str
+                )
+                .trim_end_matches('0')
+                .to_string())
+            }
+        }
     }
 
     pub fn validate(self, format: &CoordinateFormat) -> Result<Self, GerberError> {
@@ -425,8 +481,8 @@ mod test {
     #[test]
     /// Test coordinate number to string conversion when it's 0
     fn test_formatted_zero() {
-        let cf1 = CoordinateFormat::new(6, 6);
-        let cf2 = CoordinateFormat::new(2, 4);
+        let cf1 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 6, 6);
+        let cf2 = CoordinateFormat::new(ZeroOmission::Trailing, CoordinateMode::Absolute, 2, 4);
 
         let a = CoordinateNumber { nano: 0 }.gerber(&cf1).unwrap();
         let b = CoordinateNumber { nano: 0 }.gerber(&cf2).unwrap();
@@ -437,19 +493,39 @@ mod test {
     #[test]
     /// Test coordinate number to string conversion when the decimal part is 0
     fn test_formatted_decimal_zero() {
-        let cf1 = CoordinateFormat::new(6, 6);
-        let cf2 = CoordinateFormat::new(2, 4);
+        let cf1 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 6, 6);
+        let cf2 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 4);
 
         let a = CoordinateNumber { nano: 10000000 }.gerber(&cf1).unwrap();
         let b = CoordinateNumber { nano: 20000000 }.gerber(&cf2).unwrap();
+        let c = CoordinateNumber { nano: -10000000 }.gerber(&cf1).unwrap();
+        let d = CoordinateNumber { nano: -20000000 }.gerber(&cf2).unwrap();
         assert_eq!(a, "10000000".to_string());
         assert_eq!(b, "200000".to_string());
+        assert_eq!(c, "-10000000".to_string());
+        assert_eq!(d, "-200000".to_string());
+    }
+
+    #[test]
+    /// Test coordinate number to string conversion when the decimal part is 0
+    fn test_formatted_decimal_zero_omit_trailing() {
+        let cf1 = CoordinateFormat::new(ZeroOmission::Trailing, CoordinateMode::Absolute, 6, 6);
+        let cf2 = CoordinateFormat::new(ZeroOmission::Trailing, CoordinateMode::Absolute, 2, 4);
+
+        let a = CoordinateNumber { nano: 10000000 }.gerber(&cf1).unwrap();
+        let b = CoordinateNumber { nano: 20000000 }.gerber(&cf2).unwrap();
+        let c = CoordinateNumber { nano: -10000000 }.gerber(&cf1).unwrap();
+        let d = CoordinateNumber { nano: -20000000 }.gerber(&cf2).unwrap();
+        assert_eq!(a, "00001".to_string());
+        assert_eq!(b, "2".to_string());
+        assert_eq!(c, "-00001".to_string());
+        assert_eq!(d, "-2".to_string());
     }
 
     #[test]
     /// Test coordinate number to string conversion
     fn test_formatted_65() {
-        let cf = CoordinateFormat::new(6, 5);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 6, 5);
         let d = CoordinateNumber { nano: 123456789012 }.gerber(&cf).unwrap();
         assert_eq!(d, "12345678901".to_string());
     }
@@ -457,7 +533,7 @@ mod test {
     #[test]
     /// Test coordinate number to string conversion
     fn test_formatted_54() {
-        let cf = CoordinateFormat::new(5, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 5, 4);
         let d = CoordinateNumber { nano: 12345678901 }.gerber(&cf).unwrap();
         assert_eq!(d, "123456789".to_string());
     }
@@ -465,7 +541,7 @@ mod test {
     #[test]
     /// Test coordinate number to string conversion failure
     fn test_formatted_number_too_large() {
-        let cf = CoordinateFormat::new(4, 5);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 5);
         let d = CoordinateNumber { nano: 12345000000 }.gerber(&cf);
         assert!(d.is_err());
     }
@@ -473,7 +549,7 @@ mod test {
     #[test]
     /// Test coordinate number to string conversion failure
     fn test_formatted_negative_number_too_large() {
-        let cf = CoordinateFormat::new(4, 5);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 5);
         let d = CoordinateNumber { nano: -12345000000 }.gerber(&cf);
         assert!(d.is_err());
     }
@@ -481,7 +557,7 @@ mod test {
     #[test]
     /// Test coordinate number to string conversion (rounding of decimal part)
     fn test_formatted_44_rounding() {
-        let cf = CoordinateFormat::new(4, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4);
         let d = CoordinateNumber { nano: 1234432199 }.gerber(&cf).unwrap();
         assert_eq!(d, "12344322".to_string());
     }
@@ -489,7 +565,7 @@ mod test {
     #[test]
     /// Test negative coordinate number to string conversion
     fn test_formatted_negative_rounding() {
-        let cf = CoordinateFormat::new(6, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 6, 4);
         let d = CoordinateNumber {
             nano: -123456789099,
         }
@@ -500,7 +576,7 @@ mod test {
 
     #[test]
     fn test_coordinates_into() {
-        let cf = CoordinateFormat::new(2, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 4);
         let c1 = Coordinates::new(CoordinateNumber::from(1), CoordinateNumber::from(2), cf);
         let c2 = Coordinates::new(1, 2, cf);
         assert_eq!(c1, c2);
@@ -508,7 +584,7 @@ mod test {
 
     #[test]
     fn test_coordinates_into_option_some() {
-        let cf = CoordinateFormat::new(2, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 4);
         let c1 = Coordinates::new(CoordinateNumber::from(1), CoordinateNumber::from(2), cf);
         let c2 = Coordinates::new(Some(1), Some(2), cf);
         assert_eq!(c1, c2);
@@ -516,7 +592,7 @@ mod test {
 
     #[test]
     fn test_coordinates_into_option_none() {
-        let cf = CoordinateFormat::new(2, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 4);
         let c1 = Coordinates {
             x: None,
             y: None,
@@ -528,7 +604,7 @@ mod test {
 
     #[test]
     fn test_coordinates_into_option_partial() {
-        let cf = CoordinateFormat::new(2, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 4);
         let c1 = Coordinates {
             x: Some(CoordinateNumber::from(1_i32)),
             y: None,
@@ -540,7 +616,7 @@ mod test {
 
     #[test]
     fn test_coordinates_into_mixed() {
-        let cf = CoordinateFormat::new(2, 4);
+        let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 4);
         let c1 = Coordinates::new(CoordinateNumber::from(1), 2, cf);
         let c2 = Coordinates::new(1, 2, cf);
         assert_eq!(c1, c2);
@@ -554,8 +630,8 @@ mod test {
                 assert!($coords.validate().is_ok());
             }};
         }
-        let cf44 = CoordinateFormat::new(4, 4);
-        let cf46 = CoordinateFormat::new(4, 6);
+        let cf44 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4);
+        let cf46 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 6);
         assert_coords!(Coordinates::new(10, 20, cf44), "X100000Y200000");
         assert_coords!(Coordinates::at_x(10, cf44), "X100000");
         assert_coords!(Coordinates::at_x(Some(10), cf44), "X100000");
@@ -567,7 +643,7 @@ mod test {
 
     #[test]
     fn invalid_coordinates() {
-        let cf44 = CoordinateFormat::new(4, 4);
+        let cf44 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4);
         let coordinates = Coordinates {
             x: None,
             y: None,
@@ -579,7 +655,7 @@ mod test {
             Err(GerberError::EmptyCoordinates)
         ));
 
-        let cf23 = CoordinateFormat::new(2, 3);
+        let cf23 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 3);
         let bad = CoordinateNumber::try_from(100.001).unwrap();
         let good = CoordinateNumber::try_from(99.999).unwrap();
 
@@ -622,9 +698,9 @@ mod test {
                 assert!($coords.validate().is_ok());
             }};
         }
-        let cf44 = CoordinateFormat::new(4, 4);
-        let cf55 = CoordinateFormat::new(5, 5);
-        let cf66 = CoordinateFormat::new(6, 6);
+        let cf44 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4);
+        let cf55 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 5, 5);
+        let cf66 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 6, 6);
         assert_coords!(CoordinateOffset::new(10, 20, cf44), "I100000J200000");
         assert_coords!(CoordinateOffset::at_x(Some(10), cf66), "I10000000");
         assert_coords!(CoordinateOffset::at_x(10, cf66), "I10000000");
@@ -639,7 +715,7 @@ mod test {
 
     #[test]
     fn invalid_offset() {
-        let cf44 = CoordinateFormat::new(4, 4);
+        let cf44 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 4, 4);
         let coordinates = CoordinateOffset {
             x: None,
             y: None,
@@ -651,7 +727,7 @@ mod test {
             Err(GerberError::EmptyCoordinates)
         ));
 
-        let cf23 = CoordinateFormat::new(2, 3);
+        let cf23 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 3);
         let bad = CoordinateNumber::try_from(100.001).unwrap();
         let good = CoordinateNumber::try_from(99.999).unwrap();
 
@@ -689,7 +765,7 @@ mod test {
     #[test]
     fn test_validate_too_large_for_format() {
         // %FSLAX23Y23*%
-        let cf23 = CoordinateFormat::new(2, 3);
+        let cf23 = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 3);
         let number = CoordinateNumber::try_from(100.001).unwrap();
 
         println!("{:?}", number);
