@@ -6,6 +6,7 @@ use std::io::Write;
 use crate::errors::GerberResult;
 use crate::traits::{GerberCode, PartialGerberCode};
 use crate::types::*;
+use crate::{CoordinateMode, ZeroOmission};
 
 /// Implement `PartialGerberCode` for booleans
 impl<W: Write> PartialGerberCode<W> for bool {
@@ -64,7 +65,15 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
     fn serialize(&self, writer: &mut W) -> GerberResult<()> {
         match *self {
             ExtendedCode::CoordinateFormat(ref cf) => {
-                writeln!(writer, "%FSLAX{0}{1}Y{0}{1}*%", cf.integer, cf.decimal)?;
+                let zero_omission = match &cf.zero_omission {
+                    ZeroOmission::Leading => 'L',
+                    ZeroOmission::Trailing => 'T',
+                };
+                let mode = match &cf.coordinate_mode {
+                    CoordinateMode::Absolute => 'A',
+                    CoordinateMode::Incremental => 'I',
+                };
+                writeln!(writer, "%FS{2}{3}X{0}{1}Y{0}{1}*%", cf.integer, cf.decimal, zero_omission, mode)?;
             }
             ExtendedCode::Unit(ref unit) => {
                 write!(writer, "%MO")?;
@@ -112,7 +121,11 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
                 writeln!(writer, "*%")?;
             }
             ExtendedCode::DeleteAttribute(ref attr) => {
-                writeln!(writer, "%TD{}*%", attr)?;
+                write!(writer, "%TD")?;
+                if !attr.is_empty() {
+                    write!(writer, ".{}", attr)?;
+                }
+                writeln!(writer, "*%")?;
             }
             ExtendedCode::ApertureBlock(ref ab) => {
                 write!(writer, "%AB")?;

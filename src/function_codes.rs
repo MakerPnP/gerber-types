@@ -1,6 +1,6 @@
 //! Function code types.
 
-use crate::attributes;
+use crate::{attributes, CoordinateMode, Unit};
 use crate::coordinates::{CoordinateOffset, Coordinates};
 use crate::errors::GerberResult;
 use crate::traits::{GerberCode, PartialGerberCode};
@@ -32,6 +32,13 @@ pub enum GCode {
     RegionMode(bool),
     QuadrantMode(QuadrantMode),
     Comment(CommentContent),
+    /// Deprecated since December 2012, but still in use
+    Unit(Unit),
+    /// Deprecated since December 2012, but still in use
+    CoordinateMode(CoordinateMode),
+    /// Deprecated since December 2012, but still in use
+    SelectAperture,
+
 }
 
 impl<W: Write> GerberCode<W> for GCode {
@@ -51,6 +58,15 @@ impl<W: Write> GerberCode<W> for GCode {
                 content.serialize_partial(writer)?;
                 writeln!(writer, "*")?;
             }
+            GCode::Unit(ref unit) => match unit {
+                Unit::Inches => writeln!(writer, "G70*")?,
+                Unit::Millimeters => writeln!(writer, "G71*")?,
+            },
+            GCode::CoordinateMode(ref mode) => match mode {
+                CoordinateMode::Absolute => writeln!(writer, "G90*")?,
+                CoordinateMode::Incremental => writeln!(writer, "G91*")?,
+            },
+            GCode::SelectAperture => writeln!(writer, "G54*")?,
         };
         Ok(())
     }
@@ -93,6 +109,8 @@ pub enum StandardComment {
     ObjectAttribute(attributes::ObjectAttribute),
     /// TA
     ApertureAttribute(attributes::ApertureAttribute),
+    /// TD
+    DeleteAttribute(String),
 }
 
 impl<W: Write> PartialGerberCode<W> for StandardComment {
@@ -110,6 +128,12 @@ impl<W: Write> PartialGerberCode<W> for StandardComment {
             StandardComment::ApertureAttribute(ref aa) => {
                 write!(writer, "TA")?;
                 aa.serialize_partial(writer)?;
+            }
+            StandardComment::DeleteAttribute(ref content) => {
+                write!(writer, "TD")?;
+                if !content.is_empty() {
+                    write!(writer, ".{}", content)?;
+                }
             }
         }
         Ok(())

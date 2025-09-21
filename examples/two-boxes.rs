@@ -3,16 +3,12 @@
 
 use std::io::stdout;
 
-use gerber_types::{
-    Aperture, ApertureDefinition, Circle, Command, CommentContent, CoordinateFormat, Coordinates,
-    DCode, ExtendedCode, FileAttribute, FunctionCode, GCode, GenerationSoftware, GerberCode,
-    InterpolationMode, MCode, Operation, Part, Polarity, Unit,
-};
+use gerber_types::{Aperture, ApertureDefinition, Circle, Command, CommentContent, CoordinateFormat, CoordinateMode, Coordinates, DCode, ExtendedCode, FileAttribute, FunctionCode, GCode, GenerationSoftware, GerberCode, InterpolationMode, MCode, Operation, Part, Polarity, Unit, ZeroOmission};
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-    let cf = CoordinateFormat::new(2, 6);
+    let cf = CoordinateFormat::new(ZeroOmission::Leading, CoordinateMode::Absolute, 2, 6);
     let commands: Vec<Command> = vec![
         FunctionCode::GCode(GCode::Comment(CommentContent::String(
             "Ucamco ex. 1: Two square boxes".to_string(),
