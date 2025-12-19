@@ -11,6 +11,11 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### v0.7.0 (2025-12-19)
+
+- [added] Support for G54, G70, G71, G90, G91 via https://github.com/MakerPnP/gerber-types/pull/51
+- [changed] TD is now stricter and takes a criterion value. 
+
 ### v0.6.0 (2025-07-11)
 
 - [added] Added support for G04 'standard comments' where comment attributes are placed in G04 commands.
