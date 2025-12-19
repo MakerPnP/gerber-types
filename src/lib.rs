@@ -389,9 +389,21 @@ mod serialization_tests {
     }
 
     #[test]
-    fn test_delete_attribute() {
+    fn test_delete_user_attribute() {
         let d = ExtendedCode::DeleteAttribute("foo".into());
         assert_code!(d, "%TDfoo*%\n");
+    }
+
+    #[test]
+    fn test_delete_standard_attribute() {
+        let d = ExtendedCode::DeleteAttribute(".some_standard_attribute".into());
+        assert_code!(d, "%TD.some_standard_attribute*%\n");
+    }
+
+    #[test]
+    fn test_delete_empty_attribute() {
+        let d = ExtendedCode::DeleteAttribute("".into());
+        assert_code!(d, "%TD*%\n");
     }
 
     mod file_attribute {
