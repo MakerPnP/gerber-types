@@ -109,7 +109,7 @@ pub enum StandardComment {
     /// TA
     ApertureAttribute(attributes::ApertureAttribute),
     /// TD
-    DeleteAttribute(String),
+    DeleteAttribute(attributes::AttributeDeletionCriterion),
 }
 
 impl<W: Write> PartialGerberCode<W> for StandardComment {
@@ -128,11 +128,9 @@ impl<W: Write> PartialGerberCode<W> for StandardComment {
                 write!(writer, "TA")?;
                 aa.serialize_partial(writer)?;
             }
-            StandardComment::DeleteAttribute(ref content) => {
+            StandardComment::DeleteAttribute(ref adc) => {
                 write!(writer, "TD")?;
-                if !content.is_empty() {
-                    write!(writer, ".{}", content)?;
-                }
+                adc.serialize_partial(writer)?;
             }
         }
         Ok(())

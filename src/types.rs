@@ -187,7 +187,10 @@ mod test {
     use crate::extended_codes::Polarity;
     use crate::function_codes::GCode;
     use crate::traits::GerberCode;
-    use crate::{ApertureAttribute, ApertureBlock, AttributeDeletionCriterion, CommentContent, Mirroring, Rotation, Scaling, StepAndRepeat};
+    use crate::{
+        ApertureBlock, AttributeDeletionCriterion, CommentContent, Mirroring, Rotation, Scaling,
+        StepAndRepeat,
+    };
 
     #[test]
     fn test_debug() {
@@ -226,7 +229,9 @@ mod test {
 
     #[test]
     fn test_command_from_extended_code() {
-        let delete_attr = ExtendedCode::DeleteAttribute(AttributeDeletionCriterion::SingleApertureAttribute(ApertureAttribute::UserDefined { name: "test".to_string(), values: vec![] }));
+        let delete_attr = ExtendedCode::DeleteAttribute(
+            AttributeDeletionCriterion::SingleApertureAttribute("test".to_string()),
+        );
         let c1: Command = Command::ExtendedCode(delete_attr.clone());
         let c2: Command = delete_attr.into();
         assert_eq!(c1, c2);
