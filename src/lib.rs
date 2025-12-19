@@ -389,20 +389,24 @@ mod serialization_tests {
     }
 
     #[test]
-    fn test_delete_user_attribute() {
-        let d = ExtendedCode::DeleteAttribute("foo".into());
-        assert_code!(d, "%TDfoo*%\n");
+    fn test_delete_aperture_attribute() {
+        let c = ExtendedCode::DeleteAttribute(AttributeDeletionCriterion::SingleApertureAttribute(ApertureAttribute::UserDefined { name: "foo".to_string(), values: vec![] }));
+        assert_code!(c, "%TDfoo*%\n");
+        let s = ExtendedCode::DeleteAttribute(AttributeDeletionCriterion::SingleApertureAttribute(ApertureAttribute::ApertureFunction(ApertureFunction::Border)));
+        assert_code!(s, "%TD.AperFunction,Border*%\n");
     }
 
     #[test]
-    fn test_delete_standard_attribute() {
-        let d = ExtendedCode::DeleteAttribute(".some_standard_attribute".into());
-        assert_code!(d, "%TD.some_standard_attribute*%\n");
+    fn test_delete_object_attribute() {
+        let c = ExtendedCode::DeleteAttribute(AttributeDeletionCriterion::SingleObjectAttribute(ObjectAttribute::UserDefined { name: "foo".to_string(), values: vec![] }));
+        assert_code!(c, "%TDfoo*%\n");
+        let c = ExtendedCode::DeleteAttribute(AttributeDeletionCriterion::SingleObjectAttribute(ObjectAttribute::Net(Net::None)));
+        assert_code!(c, "%TD.N,*%\n");
     }
 
     #[test]
-    fn test_delete_empty_attribute() {
-        let d = ExtendedCode::DeleteAttribute("".into());
+    fn test_delete_all_object_and_aperture_attributes() {
+        let d = ExtendedCode::DeleteAttribute(AttributeDeletionCriterion::AllApertureAndObjectAttributes);
         assert_code!(d, "%TD*%\n");
     }
 

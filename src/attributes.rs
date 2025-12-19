@@ -1074,3 +1074,34 @@ impl<W: Write> PartialGerberCode<W> for Pin {
         Ok(())
     }
 }
+
+/// Gerber 2024.05 spec says:
+/// "The TD command deletes ONE or ALL aperture or object attributes from the attributes dictionary."
+/// and:
+/// "The <AttributeName> is the name of the attribute to delete. If omitted, all aperture and object
+/// attributes in the dictionary are deleted."
+/// and:
+/// "File attributes are immutable and are not deleted".
+///
+/// * Capitalization added for effect.
+#[derive(Debug, Clone, PartialEq)]
+pub enum AttributeDeletionCriterion {
+    AllApertureAndObjectAttributes,
+    SingleObjectAttribute(String),
+    SingleApertureAttribute(String),
+}
+
+impl<W: Write> PartialGerberCode<W> for AttributeDeletionCriterion {
+    fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        match self {
+            AttributeDeletionCriterion::AllApertureAndObjectAttributes => {}
+            AttributeDeletionCriterion::SingleObjectAttribute(name) => {
+                write!(writer, "{}", name)?;
+            }
+            AttributeDeletionCriterion::SingleApertureAttribute(name) => {
+                write!(writer, "{}", name)?;
+            }
+        }
+        Ok(())
+    }
+}
