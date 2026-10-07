@@ -87,7 +87,7 @@ impl<W: Write> PartialGerberCode<W> for CommentContent {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match *self {
             CommentContent::String(ref string) => {
-                write!(writer, "{}", string)?;
+                write!(writer, "{}", crate::codegen::Escaped(string, false))?;
             }
             CommentContent::Standard(ref standard) => {
                 standard.serialize_partial(writer)?;

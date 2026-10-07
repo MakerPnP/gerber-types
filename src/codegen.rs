@@ -8,6 +8,32 @@ use crate::traits::{GerberCode, PartialGerberCode};
 use crate::types::*;
 use crate::{CoordinateMode, ZeroOmission};
 
+/// Format a Gerber string or field as printable ASCII with Unicode escapes.
+/// Names and macro expressions have their own syntax and must not use this helper.
+pub(crate) struct Escaped<'a>(pub(crate) &'a str, pub(crate) bool);
+
+impl std::fmt::Display for Escaped<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for ch in self.0.chars() {
+            if !ch.is_ascii()
+                || ch.is_ascii_control()
+                || matches!(ch, '%' | '*' | '\\')
+                || (self.1 && ch == ',')
+            {
+                let code = ch as u32;
+                if code <= 0xffff {
+                    write!(f, "\\u{:04X}", code)?;
+                } else {
+                    write!(f, "\\U{:08X}", code)?;
+                }
+            } else {
+                write!(f, "{}", ch)?;
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Implement `PartialGerberCode` for booleans
 impl<W: Write> PartialGerberCode<W> for bool {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
@@ -181,5 +207,72 @@ impl<W: Write> GerberCode<W> for ExtendedCode {
             }
         };
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod unicode_tests {
+    use super::*;
+    use crate::{ApertureAttribute, FileAttribute, Net, ObjectAttribute};
+
+    #[test]
+    fn unicode_and_reserved_characters() {
+        assert_eq!(
+            Escaped("ASCII ©中😀\\u0041%*\r\n\t", false).to_string(),
+            r"ASCII \u00A9\u4E2D\U0001F600\u005Cu0041\u0025\u002A\u000D\u000A\u0009"
+        );
+        assert_eq!(Escaped(",", false).to_string(), ",");
+        assert_eq!(Escaped(",", true).to_string(), r"\u002C");
+        assert_eq!(
+            Escaped("\u{ffff}\u{10000}\u{10ffff}", true).to_string(),
+            r"\uFFFF\U00010000\U0010FFFF"
+        );
+    }
+
+    #[test]
+    fn attribute_fields_preserve_separators() {
+        let commands = vec![
+            Command::ExtendedCode(ExtendedCode::FileAttribute(FileAttribute::UserDefined {
+                name: "custom".into(),
+                values: vec!["a,b".into(), "©*%".into()],
+            })),
+            Command::ExtendedCode(ExtendedCode::ApertureAttribute(
+                ApertureAttribute::UserDefined {
+                    name: "custom".into(),
+                    values: vec!["😀".into()],
+                },
+            )),
+            Command::ExtendedCode(ExtendedCode::ObjectAttribute(ObjectAttribute::Net(
+                Net::Connected(vec!["a,b".into(), "中".into()]),
+            ))),
+        ];
+        let mut output = Vec::new();
+        commands.serialize(&mut output).unwrap();
+        assert_eq!(String::from_utf8(output).unwrap(),
+            "%TFcustom,a\\u002Cb,\\u00A9\\u002A\\u0025*%\n%TAcustom,\\U0001F600*%\n%TO.N,a\\u002Cb,\\u4E2D*%\n");
+    }
+
+    #[test]
+    fn comments_preserve_commas_and_escape_delimiters() {
+        let mut output = Vec::new();
+        crate::CommentContent::String("©, *%\\".into())
+            .serialize_partial(&mut output)
+            .unwrap();
+        assert_eq!(
+            String::from_utf8(output).unwrap(),
+            r"\u00A9, \u002A\u0025\u005C"
+        );
+        let mut output = Vec::new();
+        crate::MacroContent::Comment("😀,*".into())
+            .serialize_partial(&mut output)
+            .unwrap();
+        assert_eq!(String::from_utf8(output).unwrap(), r"0 \U0001F600,\u002A*");
+    }
+
+    #[test]
+    fn writer_errors_are_propagated() {
+        let mut output = std::io::Cursor::new([0u8; 1]);
+        let result = crate::CommentContent::String("©".into()).serialize_partial(&mut output);
+        assert!(matches!(result, Err(crate::GerberError::IoError(_))));
     }
 }

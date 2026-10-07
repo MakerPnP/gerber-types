@@ -1,5 +1,7 @@
 //! Attributes.
 
+use crate::codegen::Escaped;
+
 use std::io::Write;
 use strum_macros::{IntoStaticStr, VariantArray, VariantNames};
 use uuid::Uuid;
@@ -22,7 +24,7 @@ impl<W: Write> PartialGerberCode<W> for Ident {
                 write!(writer, "{}", guid)?;
             }
             Ident::Name(value) => {
-                write!(writer, "{}", value)?;
+                write!(writer, "{}", Escaped(value, true))?;
             }
         }
 
@@ -206,7 +208,7 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                         pos.serialize_partial(writer)?;
                     }
                     FileFunction::Other(value) => {
-                        write!(writer, "Other,{}", value)?;
+                        write!(writer, "Other,{}", Escaped(value, true))?;
                     }
 
                     // "Drawing layers"
@@ -227,7 +229,7 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                         write!(writer, "ArrayDrawing")?;
                     }
                     FileFunction::OtherDrawing(value) => {
-                        write!(writer, "OtherDrawing,{}", value)?;
+                        write!(writer, "OtherDrawing,{}", Escaped(value, true))?;
                     }
                 }
             }
@@ -250,13 +252,19 @@ impl<W: Write> PartialGerberCode<W> for FileAttribute {
                 gs.serialize_partial(writer)?;
             }
             FileAttribute::ProjectId { id, uuid, revision } => {
-                write!(writer, ".ProjectId,{},{},{}", id, uuid, revision)?;
+                write!(
+                    writer,
+                    ".ProjectId,{},{},{}",
+                    Escaped(id, true),
+                    uuid,
+                    Escaped(revision, true)
+                )?;
             }
-            FileAttribute::Md5(ref hash) => write!(writer, ".MD5,{}", hash)?,
+            FileAttribute::Md5(ref hash) => write!(writer, ".MD5,{}", Escaped(hash, true))?,
             FileAttribute::UserDefined { name, values } => {
                 write!(writer, "{}", name)?;
                 for value in values {
-                    write!(writer, ",{}", value)?;
+                    write!(writer, ",{}", Escaped(value, true))?;
                 }
             }
         };
@@ -346,7 +354,7 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                         write!(writer, "CastellatedDrill")?;
                     }
                     ApertureFunction::OtherDrill(ref value) => {
-                        write!(writer, "OtherDrill,{}", value)?;
+                        write!(writer, "OtherDrill,{}", Escaped(value, true))?;
                     }
 
                     // "Copper layers"
@@ -390,7 +398,7 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                         write!(writer, "AntiPad")?;
                     }
                     ApertureFunction::OtherPad(ref value) => {
-                        write!(writer, "OtherPad,{}", value)?;
+                        write!(writer, "OtherPad,{}", Escaped(value, true))?;
                     }
                     ApertureFunction::Conductor => {
                         write!(writer, "Conductor")?;
@@ -408,7 +416,7 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                         write!(writer, "Border")?;
                     }
                     ApertureFunction::OtherCopper(ref value) => {
-                        write!(writer, "OtherCopper,{}", value)?;
+                        write!(writer, "OtherCopper,{}", Escaped(value, true))?;
                     }
 
                     // "Component layers"
@@ -434,7 +442,7 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                         write!(writer, "Material")?;
                     }
                     ApertureFunction::Other(value) => {
-                        write!(writer, "Other,{}", value)?;
+                        write!(writer, "Other,{}", Escaped(value, true))?;
                     }
 
                     // 2024.05 - 8.4 - "Deprecated attribute values"
@@ -463,13 +471,13 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                 size,
                 comment,
             } => {
-                write!(writer, ".FlashText,{},", text)?;
+                write!(writer, ".FlashText,{},", Escaped(text, true))?;
                 mode.serialize_partial(writer)?;
                 write!(writer, ",")?;
                 mirroring.serialize_partial(writer)?;
                 write!(writer, ",")?;
                 if let Some(font) = font {
-                    write!(writer, "{}", font)?;
+                    write!(writer, "{}", Escaped(font, true))?;
                 }
                 write!(writer, ",")?;
                 if let Some(size) = size {
@@ -477,13 +485,13 @@ impl<W: Write> PartialGerberCode<W> for ApertureAttribute {
                 }
                 write!(writer, ",")?;
                 if let Some(comment) = comment {
-                    write!(writer, "{}", comment)?;
+                    write!(writer, "{}", Escaped(comment, true))?;
                 }
             }
             ApertureAttribute::UserDefined { name, values } => {
                 write!(writer, "{}", name)?;
                 for value in values {
-                    write!(writer, ",{}", value)?;
+                    write!(writer, ",{}", Escaped(value, true))?;
                 }
             }
         }
@@ -514,7 +522,7 @@ impl<W: Write> PartialGerberCode<W> for Part {
             Part::Array => write!(writer, "Array")?,
             Part::FabricationPanel => write!(writer, "FabricationPanel")?,
             Part::Coupon => write!(writer, "Coupon")?,
-            Part::Other(ref description) => write!(writer, "Other,{}", description)?,
+            Part::Other(ref description) => write!(writer, "Other,{}", Escaped(description, true))?,
         };
         Ok(())
     }
@@ -737,8 +745,19 @@ impl GenerationSoftware {
 impl<W: Write> PartialGerberCode<W> for GenerationSoftware {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
         match self.version {
-            Some(ref v) => write!(writer, "{},{},{}", self.vendor, self.application, v)?,
-            None => write!(writer, "{},{}", self.vendor, self.application)?,
+            Some(ref v) => write!(
+                writer,
+                "{},{},{}",
+                Escaped(&self.vendor, true),
+                Escaped(&self.application, true),
+                Escaped(v, true)
+            )?,
+            None => write!(
+                writer,
+                "{},{}",
+                Escaped(&self.vendor, true),
+                Escaped(&self.application, true)
+            )?,
         };
         Ok(())
     }
@@ -903,7 +922,7 @@ impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
                 pin.serialize_partial(writer)?;
             }
             ObjectAttribute::Component(ref_des) => {
-                write!(writer, ".C,{}", ref_des)?;
+                write!(writer, ".C,{}", Escaped(ref_des, true))?;
             }
             ObjectAttribute::ComponentCharacteristics(cc) => {
                 cc.serialize_partial(writer)?;
@@ -911,7 +930,7 @@ impl<W: Write> PartialGerberCode<W> for ObjectAttribute {
             ObjectAttribute::UserDefined { name, values } => {
                 write!(writer, "{}", name)?;
                 for value in values {
-                    write!(writer, ",{}", value)?;
+                    write!(writer, ",{}", Escaped(value, true))?;
                 }
             }
         };
@@ -957,35 +976,35 @@ impl<W: Write> PartialGerberCode<W> for ComponentCharacteristics {
                 write!(writer, ".CRot,{}", rotation)?;
             }
             ComponentCharacteristics::Manufacturer(manufacturer) => {
-                write!(writer, ".CMfr,{}", manufacturer)?;
+                write!(writer, ".CMfr,{}", Escaped(manufacturer, true))?;
             }
             ComponentCharacteristics::MPN(mpn) => {
-                write!(writer, ".CMPN,{}", mpn)?;
+                write!(writer, ".CMPN,{}", Escaped(mpn, true))?;
             }
             ComponentCharacteristics::Value(value) => {
-                write!(writer, ".CVal,{}", value)?;
+                write!(writer, ".CVal,{}", Escaped(value, true))?;
             }
             ComponentCharacteristics::Mount(mount) => {
                 write!(writer, ".CMnt,")?;
                 mount.serialize_partial(writer)?;
             }
             ComponentCharacteristics::Footprint(footprint) => {
-                write!(writer, ".CFtp,{}", footprint)?;
+                write!(writer, ".CFtp,{}", Escaped(footprint, true))?;
             }
             ComponentCharacteristics::PackageName(package_name) => {
-                write!(writer, ".CPgN,{}", package_name)?;
+                write!(writer, ".CPgN,{}", Escaped(package_name, true))?;
             }
             ComponentCharacteristics::PackageDescription(package_description) => {
-                write!(writer, ".CPgD,{}", package_description)?;
+                write!(writer, ".CPgD,{}", Escaped(package_description, true))?;
             }
             ComponentCharacteristics::Height(height) => {
                 write!(writer, ".CHgt,{}", height)?;
             }
             ComponentCharacteristics::LibraryName(library_name) => {
-                write!(writer, ".CLbN,{}", library_name)?;
+                write!(writer, ".CLbN,{}", Escaped(library_name, true))?;
             }
             ComponentCharacteristics::LibraryDescription(library_description) => {
-                write!(writer, ".CLbD,{}", library_description)?;
+                write!(writer, ".CLbD,{}", Escaped(library_description, true))?;
             }
             ComponentCharacteristics::Supplier(values) => {
                 write!(writer, ".CSup")?;
@@ -1028,7 +1047,8 @@ impl<W: Write> PartialGerberCode<W> for SupplierPart {
         write!(
             writer,
             "{},{}",
-            self.supplier_name, self.supplier_part_reference
+            Escaped(&self.supplier_name, true),
+            Escaped(&self.supplier_part_reference, true)
         )?;
         Ok(())
     }
@@ -1050,7 +1070,12 @@ impl<W: Write> PartialGerberCode<W> for Net {
                 write!(writer, "N/C")?;
             }
             Net::Connected(nets) => {
-                write!(writer, "{}", nets.join(","))?;
+                for (index, net) in nets.iter().enumerate() {
+                    if index != 0 {
+                        write!(writer, ",")?;
+                    }
+                    write!(writer, "{}", Escaped(net, true))?;
+                }
             }
         }
         Ok(())
@@ -1067,9 +1092,14 @@ pub struct Pin {
 
 impl<W: Write> PartialGerberCode<W> for Pin {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        write!(writer, ".P,{},{}", self.refdes, self.name)?;
+        write!(
+            writer,
+            ".P,{},{}",
+            Escaped(&self.refdes, true),
+            Escaped(&self.name, true)
+        )?;
         if let Some(function) = &self.function {
-            write!(writer, ",{}", function)?;
+            write!(writer, ",{}", Escaped(function, true))?;
         }
         Ok(())
     }
