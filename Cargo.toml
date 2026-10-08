@@ -19,6 +19,7 @@ include = [
     "LICENSE-*",
 ]
 edition = "2018"
+rust-version = "1.89"
 
 [dependencies]
 chrono = "0.4"

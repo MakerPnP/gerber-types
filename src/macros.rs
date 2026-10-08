@@ -216,7 +216,9 @@ impl<W: Write> PartialGerberCode<W> for MacroContent {
             MacroContent::Polygon(ref p) => p.serialize_partial(writer)?,
             MacroContent::Moire(ref m) => m.serialize_partial(writer)?,
             MacroContent::Thermal(ref t) => t.serialize_partial(writer)?,
-            MacroContent::Comment(ref s) => write!(writer, "0 {}*", &s)?,
+            MacroContent::Comment(ref s) => {
+                write!(writer, "0 {}*", crate::codegen::DataType::String(s))?
+            }
             MacroContent::VariableDefinition(ref v) => v.serialize_partial(writer)?,
         };
         Ok(())
