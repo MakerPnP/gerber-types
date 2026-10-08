@@ -541,7 +541,7 @@ pub struct ImageName {
 
 impl<W: Write> PartialGerberCode<W> for ImageName {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
-        write!(writer, "{}", crate::codegen::Escaped(&self.name, false))?;
+        write!(writer, "{}", crate::codegen::EscapedString(&self.name))?;
         Ok(())
     }
 }
