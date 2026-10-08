@@ -8,50 +8,45 @@ use crate::traits::{GerberCode, PartialGerberCode};
 use crate::types::*;
 use crate::{CoordinateMode, ZeroOmission};
 
-/// Format a string as printable ASCII with Unicode escapes.
-/// Commas are preserved; non-ASCII characters, control characters, `%`, `*`, and
-/// backslashes are escaped. Names and macro expressions must not use this helper.
-pub(crate) struct EscapedString<'a>(pub(crate) &'a str);
-
-/// Format an attribute field as printable ASCII with Unicode escapes.
-/// Uses the same escaping as `EscapedString`, but also escapes commas as
-/// `\u002C` because commas separate attribute fields.
-pub(crate) struct EscapedField<'a>(pub(crate) &'a str);
-
-impl std::fmt::Display for EscapedString<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt_escaped(self.0, f, false)
-    }
+/// Format string data as printable ASCII with Unicode escapes.
+/// Names and macro expressions must not use this helper.
+pub(crate) enum DataType<'a> {
+    /// An attribute field, where commas must be escaped as separators.
+    Field(&'a str),
+    /// A string, where commas are preserved.
+    String(&'a str),
 }
 
-impl std::fmt::Display for EscapedField<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt_escaped(self.0, f, true)
-    }
-}
-
-fn fmt_escaped(
-    text: &str,
-    f: &mut std::fmt::Formatter<'_>,
-    escape_commas: bool,
-) -> std::fmt::Result {
-    for ch in text.chars() {
-        if !ch.is_ascii()
-            || ch.is_ascii_control()
-            || matches!(ch, '%' | '*' | '\\')
-            || (escape_commas && ch == ',')
-        {
-            let code = ch as u32;
-            if code <= 0xffff {
-                write!(f, r"\u{:04X}", code)?;
-            } else {
-                write!(f, r"\U{:08X}", code)?;
-            }
-        } else {
-            write!(f, "{}", ch)?;
+impl DataType<'_> {
+    /// Reserved ASCII characters to escape in addition to control characters.
+    const fn escaped_ascii_chars(&self) -> &'static [char] {
+        match self {
+            Self::Field(_) => &['%', '*', '\\', ','],
+            Self::String(_) => &['%', '*', '\\'],
         }
     }
-    Ok(())
+}
+
+impl std::fmt::Display for DataType<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self {
+            Self::Field(text) | Self::String(text) => text,
+        };
+        let escaped_ascii_chars = self.escaped_ascii_chars();
+        for ch in text.chars() {
+            if !ch.is_ascii() || ch.is_ascii_control() || escaped_ascii_chars.contains(&ch) {
+                let code = ch as u32;
+                if code <= 0xffff {
+                    write!(f, r"\u{:04X}", code)?;
+                } else {
+                    write!(f, r"\U{:08X}", code)?;
+                }
+            } else {
+                write!(f, "{}", ch)?;
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Implement `PartialGerberCode` for booleans
@@ -238,13 +233,13 @@ mod unicode_tests {
     #[test]
     fn unicode_and_reserved_characters() {
         assert_eq!(
-            EscapedString("ASCII ©中😀\\u0041%*\r\n\t").to_string(),
+            DataType::String("ASCII ©中😀\\u0041%*\r\n\t").to_string(),
             r"ASCII \u00A9\u4E2D\U0001F600\u005Cu0041\u0025\u002A\u000D\u000A\u0009"
         );
-        assert_eq!(EscapedString(",").to_string(), ",");
-        assert_eq!(EscapedField(",").to_string(), r"\u002C");
+        assert_eq!(DataType::String(",").to_string(), ",");
+        assert_eq!(DataType::Field(",").to_string(), r"\u002C");
         assert_eq!(
-            EscapedField("\u{ffff}\u{10000}\u{10ffff}").to_string(),
+            DataType::Field("\u{ffff}\u{10000}\u{10ffff}").to_string(),
             r"\uFFFF\U00010000\U0010FFFF"
         );
     }
