@@ -310,6 +310,11 @@ impl CirclePrimitive {
 
 impl<W: Write> PartialGerberCode<W> for CirclePrimitive {
     fn serialize_partial(&self, writer: &mut W) -> GerberResult<()> {
+        if self.diameter.is_negative() {
+            return Err(GerberError::RangeError(
+                "Circle diameter may not be negative".into(),
+            ));
+        }
         write!(writer, "1,")?;
         self.exposure.serialize_partial(writer)?;
         write!(writer, ",")?;
@@ -908,6 +913,21 @@ mod test {
             let code = String::from_utf8(bytes).unwrap();
             assert_eq!(&code, $expected);
         };
+    }
+
+    #[test]
+    fn test_circle_negative_diameter_rejected_without_output() {
+        let circle = CirclePrimitive::new(Value(-1.0));
+        let mut output = Vec::new();
+
+        let result = circle.serialize_partial(&mut output);
+
+        assert!(
+            matches!(&result, Err(GerberError::RangeError(_))),
+            "expected RangeError, got {:?}",
+            result
+        );
+        assert!(output.is_empty(), "invalid input must not produce output");
     }
 
     #[test]
